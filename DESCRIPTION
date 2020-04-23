@@ -1,0 +1,12 @@
+Package: lmDiallel
+Version: 0.5
+Date: 2020-04-23
+Title: Linear fixed effects models for diallel crosses
+Authors@R: c(person("Andrea" , "Onofri", role = c("aut", "cre"), email="andrea.onofri@unipg.it"), 
+             person("Niccolo", "Terzaroli", email="n.terzaroli@gmail.com", role = "aut"))
+Maintainer: Andrea Onofri <andrea.onofri@unipg.it>
+Depends: R (>= 3.5.0)
+Description: This package contains several service functions to be used to analyse datasets obtained from diallel experiments within the frame of linear models in R.
+URL: https://www.statforbiology.com
+License: GPL (>= 2)
+
