@@ -294,6 +294,10 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       }
     }
 
+predict.diallel <- function(obj){
+  fitted(obj)
+}
+
 MLfit1 <- function(X, Y, z, Par1, Par2){
   # Maximum likelihood fit for HAYMAN1
   # Building new incidence matrix

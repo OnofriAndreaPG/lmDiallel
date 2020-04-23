@@ -14,3 +14,4 @@ export(model.matrixDiallel, lm.diallel, matBlock,
 S3method(summary, diallel)
 S3method(vcov, diallel)
 S3method(anova, diallel)
+S3method(predict, diallel)
