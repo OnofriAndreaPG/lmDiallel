@@ -101,11 +101,11 @@ vcov.diallel <- function(object, ...)
 
 anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 {
-    if(object$ML == F & is.null(MSE) & object$Env == F
-       & object$fct != "HAYMAN1" & object$fct != "HAYMAN2"){
-      ## Analisi con blocco: uso dell'errore residuo ####
-      ## Do not copy this: anova.lmlist is not an exported object.
-      ## See anova.glm for further comments.
+    if(object$ML == F & is.null(MSE) & object$Env == F){
+       #& object$fct != "HAYMAN1" & object$fct != "HAYMAN2"){
+       ## Analisi con blocco: uso dell'errore residuo ####
+       ## Do not copy this: anova.lmlist is not an exported object.
+       ## See anova.glm for further comments.
     if(length(list(object, ...)) > 1L) return(anova.lmlist(object, ...))
     # object <- fit
     #if(!inherits(object, "lm"))
@@ -191,7 +191,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       names(dataset)[4:5] <- c("Block", "Env")
       dataset$Block <- factor(dataset$Block)
       dataset$Env <- factor(dataset$Env)
-      matsOr <- model.matrix.diallel(~dataset[,2]+dataset[,3],
+      matsOr <- model.matrixDiallel(~dataset[,2]+dataset[,3],
                            dataset$Block,
                            fct = fct)
       asgn2 <- attr(matsOr, "assign")

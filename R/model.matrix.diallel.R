@@ -811,7 +811,7 @@ matSCA2 <- function(P1, P2){
     P1n <- as.numeric(P1); P2n <- as.numeric(P2)
     combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
     mating <- factor(P1n*10 + P2n)
-    p <- length(levels(factor(c(levels(Par1), levels(Par2)) )))
+    p <- length(levels(factor(c(levels(P1), levels(P2)) )))
     n <- length(combination)
     last <- seq(10, p*10, 10) + p
     levs <- as.numeric(levels(combination))
@@ -1095,8 +1095,8 @@ matHbar <- function(P1, P2){
 
 matHi <- function(P1, P2){
   # For GE models ??
-  P1c <- as.character(Par1)
-  P2c <- as.character(Par2)
+  P1c <- as.character(P1)
+  P2c <- as.character(P2)
   selfs <- ifelse(P1c == P2c, 1, 0)
   contrasts(P1) <- c("contr.sum")
   contrasts(P2) <- c("contr.sum")
@@ -1107,8 +1107,8 @@ matHi <- function(P1, P2){
 }
 matHi.GE <- function(P1, P2){
   # For GE models ??
-  P1c <- as.character(Par1)
-  P2c <- as.character(Par2)
+  P1c <- as.character(P1)
+  P2c <- as.character(P2)
   #selfs <- ifelse(P1c == P2c, 1, 0)
   crosses <- ifelse(P1c == P2c, 0, 1)
   contrasts(P1) <- c("contr.sum")
