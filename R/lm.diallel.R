@@ -78,13 +78,16 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
 }
 
 
-summary.diallel <- function (object, correlation = FALSE, symbolic.cor = FALSE,
-    ...)
+summary.diallel <- function (object, correlation = FALSE, symbolic.cor = FALSE, 
+                             MSE = NULL, dfr = NULL, ...)
 { #print(is.null(object$MLcoefficients))
-  if(object$ML == T){
-  tab <- object$LScoefficients
+  if(!is.null(MSE) & !is.null(dfr)){
+  sigma <- sqrt(MSE)
+  X <- object$modMatrix
+  ses <- sqrt(diag(solve( t(X) %*% X ))) * sigma
+  tab <- data.frame("Estimate" = object$coef, "Std. Error" = ses)
   tab$"t value" <- tab[,1]/tab[,2]
-  tab$"Pr(>|t|)" <- 2 * pt(abs(tab$"t value"), object$df.residual, lower.tail = F)
+  tab$"Pr(>|t|)" <- 2 * pt(abs(tab$"t value"), dfr, lower.tail = F)
   return(tab)
   }else{
   z <- object
@@ -102,10 +105,10 @@ vcov.diallel <- function(object, ...)
 anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 {
     if(object$ML == F & is.null(MSE) & object$Env == F){
-       #& object$fct != "HAYMAN1" & object$fct != "HAYMAN2"){
-       ## Analisi con blocco: uso dell'errore residuo ####
+       ## Uso del residuo come errore ####
        ## Do not copy this: anova.lmlist is not an exported object.
        ## See anova.glm for further comments.
+    
     if(length(list(object, ...)) > 1L) return(anova.lmlist(object, ...))
     # object <- fit
     #if(!inherits(object, "lm"))
@@ -248,7 +251,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
                   class = c("anova", "data.frame"))# was "tabular"
       table
       } else {
-      # Hyman #############################
+      # Non uso il residuo come errore, ma quello fornito
       rss <- c()
       fit <- object
       asgn <- fit$assign
@@ -268,28 +271,33 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       ss <- rss[1:ngroup] - rss[2:(ngroup+1)]
       ss <- c(rss[1], ss)
       df <- c(lengths(split(asgn,  asgn)), fit$df.residual)
-      if(object$fct == "HAYMAN1" & object$ML == T) {
-        df[3] <- df[3]/2
-      } else if(object$fct == "HAYMAN2" & object$ML == T){
-        df[6] <- df[6]/2
+      tlabels <- object$namEff
+      
+      if(fit$df.residual == 0){
+         ss <- ss[-length(ss)]
+         df <- df[-length(df)]
+         tlabels <- object$namEff[-length(object$namEff)]
       }
+      #   df[3] <- df[3]/2
+      # } else if(object$fct == "HAYMAN2" & object$ML == T){
+      #   df[6] <- df[6]/2
+      # }
       ms <- ss/df
       table <- data.frame(df, ss, ms)#, f, P)
-      row.names(table) <- fit$namEff
-      if(!is.null(MSE)){
-        f <- ms/MSE
-        P <- pf(f, df, dfr, lower.tail = FALSE)
-        table <- data.frame(df, ss, ms, dfr, f, P)
-        #table[length(P), 4:5] <- NA
-        tlabels <- object$namEff
-        dimnames(table) <- list(c(tlabels),
+      #row.names(table) <- fit$namEff
+      #if(!is.null(MSE)){
+      f <- ms/MSE
+      P <- pf(f, df, dfr, lower.tail = FALSE)
+      table <- data.frame(df, ss, ms, dfr, f, P)
+      
+      dimnames(table) <- list(c(tlabels),
                                 c("Df","Sum Sq", "Mean Sq", "Den df", "F value", "Pr(>F)"))
         if(attr(object$terms,"intercept")) table <- table[-1, ]
         structure(table, heading = c("Analysis of Variance Table\n",
                                      paste("Response:", deparse(formula(object)[[2L]]))),
                   class = c("anova", "data.frame"))# was "tabular"
 
-      }
+      #}
       table
       }
     }
