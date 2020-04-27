@@ -338,7 +338,7 @@ if(is.null(Env) == T){
 
     # Creazione matrice incidenza (per ogni ambiente)
     matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
-              model.matrix.diallel(~ df$Par1+df$Par2, df$Block,
+              model.matriDiallel(~ df$Par1+df$Par2, df$Block,
                   fct = fct)})
     mats <- matsOr
     mats <- lapply(mats, function(x) x[, -1])
