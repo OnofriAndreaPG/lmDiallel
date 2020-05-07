@@ -1,3 +1,5 @@
+# Wrapper for lm and diallel models
+# Last edited: 7/5/2020
 lm.diallel <- function(formula, Block = NULL, Env = NULL,
                        fct = "GRIFFING2", data,
                        ML = FALSE){
@@ -78,14 +80,15 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
 }
 
 
-summary.diallel <- function (object, correlation = FALSE, symbolic.cor = FALSE, 
+summary.diallel <- function (object, correlation = FALSE, symbolic.cor = FALSE,
                              MSE = NULL, dfr = NULL, ...)
 { #print(is.null(object$MLcoefficients))
   if(!is.null(MSE) & !is.null(dfr)){
   sigma <- sqrt(MSE)
-  X <- object$modMatrix
+  if(any(class(object) == "diallel") == T) {X <- object$modMatrix
+  } else { X <- model.matrix(object)}
   ses <- sqrt(diag(solve( t(X) %*% X ))) * sigma
-  tab <- data.frame("Estimate" = object$coef, "Std. Error" = ses)
+  tab <- data.frame("Estimate" = object$coef, "SE" = ses)
   tab$"t value" <- tab[,1]/tab[,2]
   tab$"Pr(>|t|)" <- 2 * pt(abs(tab$"t value"), dfr, lower.tail = F)
   return(tab)
@@ -104,11 +107,12 @@ vcov.diallel <- function(object, ...)
 
 anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 {
-    if(object$ML == F & is.null(MSE) & object$Env == F){
-       ## Uso del residuo come errore ####
-       ## Do not copy this: anova.lmlist is not an exported object.
-       ## See anova.glm for further comments.
-    
+  if(is.null(object$Env)) {object$Env <- FALSE }
+  if(object$Env == F){
+    ## Se non c'è MSE esplicito: uso del residuo come errore ####
+    ## Do not copy this: anova.lmlist is not an exported object.
+    ## See anova.glm for further comments.
+
     if(length(list(object, ...)) > 1L) return(anova.lmlist(object, ...))
     # object <- fit
     #if(!inherits(object, "lm"))
@@ -116,16 +120,18 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
     w <- object$weights
     ssr <- sum(if(is.null(w)) object$residuals^2 else w*object$residuals^2)
     mss <- sum(if(is.null(w)) object$fitted.values^2 else w*object$fitted.values^2)
-    if(ssr < 1e-10*mss)
+    if(ssr < 1e-10*mss & is.null(MSE))
         warning("ANOVA F-tests on an essentially perfect fit are unreliable")
-    dfr <- df.residual(object)
+    if( is.null(dfr) ) dfr <- df.residual(object)
     p <- object$rank
     if(p > 0L) {
         p1 <- 1L:p
         comp <- object$effects[p1]
         asgn <- object$assign[object$qr$pivot][p1]
         nmeffects <- c("(Intercept)", attr(object$terms, "term.labels"))
-        tlabels <- object$namEff
+        if(any(class(object) == "diallel") == T) {tlabels <- object$namEff
+        } else {tlabels <- nmeffects[1 + unique(asgn)] 
+        nmeffects}
         ss <- c(unlist(lapply(split(comp^2,asgn), sum)), ssr)
         df <- c(lengths(split(asgn,  asgn)), dfr)
     } else {
@@ -133,24 +139,37 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
         df <- dfr
         tlabels <- character()
     }
-    ms <- ss/df
-    f <- ms/(ssr/dfr)
-    P <- pf(f, df, dfr, lower.tail = FALSE)
-    table <- data.frame(df, ss, ms, f, P)
-    table[length(P), 4:5] <- NA
-
+    if(is.null(MSE)){
+      ms <- ss/df
+      f <- ms/(ssr/dfr)
+      P <- pf(f, df, dfr, lower.tail = FALSE)
+      # P[length(P)] <- NULL
+      # f[length(f)] <- NULL
+      table <- data.frame(df, ss, ms, f, P)
+      table[length(P), 3:5] <- NA
+    } else {
+      ms <- ss/df
+      f <- ms/MSE
+      P <- pf(f, df, dfr, lower.tail = FALSE)
+      # P[length(P)] <- NULL
+      # f[length(f)] <- NULL
+      table <- data.frame(df, ss, ms, f, P)
+      table[length(P), 2:5] <- NA
+      table[length(P), 3] <- MSE
+    }
+    if(all(class(object) != "diallel")) tlabels <- c(tlabels, "Residuals")
     dimnames(table) <- list(c(tlabels),
                             c("Df","Sum Sq", "Mean Sq", "F value", "Pr(>F)"))
     if(attr(object$terms,"intercept")) table <- table[-1, ]
     structure(table, heading = c("Analysis of Variance Table\n",
 		     paste("Response:", deparse(formula(object)[[2L]]))),
-	      class = c("anova", "data.frame"))# was "tabular"
+	     class = c("anova", "data.frame"))# was "tabular"
 
-    }else if(object$Env == F & (object$fct == "GE2" | object$fct == "GE2r")) {
-       ## Analisi senza blocco, per GE2 e GE2r ####
-       ## Deve ricalcolare in modo diverso
-       ssr <- sum(object$residuals^2)
-       if(!is.null(MSE)) dfr1 <- dfr
+    } else if(object$Env == F & (object$fct == "GE2" | object$fct == "GE2r")) {
+    ## Analisi senza blocco, per GE2 e GE2r ####
+    ## Deve ricalcolare in modo diverso
+    ssr <- sum(object$residuals^2)
+    if(!is.null(MSE)) dfr1 <- dfr
     #print(dfr1)
     dfr <- df.residual(object)
     #if(!is.null(MSE)) ssr1 <- MSE * dfr1
@@ -180,7 +199,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
                                      paste("Response:", deparse(formula(object)[[2L]]))),
                   class = c("anova", "data.frame"))# was "tabular"
       }
-      table
+      #table
     }else if(object$Env == T) {
       # Analisi con anno ############
       X <- object$modMatrix
@@ -244,14 +263,17 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       f <- ms/MSE
       P <- pf(f, dfr, dfr1, lower.tail = FALSE)
       table <- data.frame(dfr, ss, ms, f, P)
+      print(table); print(length(P))
+      table[length(P), 4:5] <- NA
       colnames(table) <- c("Df","Sum Sq", "Mean Sq", "F value", "Pr(>F)")
       row.names(table) <- labTab
       structure(table, heading = c("Analysis of Variance Table\n",
                                      paste("Response:", deparse(formula(object)[[2L]]))),
                   class = c("anova", "data.frame"))# was "tabular"
-      table
-      } else {
-      # Non uso il residuo come errore, ma quello fornito
+    } else {
+      # Non uso il residuo come errore, 
+      ## ma quello fornito
+      # print("OK")
       rss <- c()
       fit <- object
       asgn <- fit$assign
@@ -272,7 +294,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       ss <- c(rss[1], ss)
       df <- c(lengths(split(asgn,  asgn)), fit$df.residual)
       tlabels <- object$namEff
-      
+
       if(fit$df.residual == 0){
          ss <- ss[-length(ss)]
          df <- df[-length(df)]
@@ -289,7 +311,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       f <- ms/MSE
       P <- pf(f, df, dfr, lower.tail = FALSE)
       table <- data.frame(df, ss, ms, dfr, f, P)
-      
+
       dimnames(table) <- list(c(tlabels),
                                 c("Df","Sum Sq", "Mean Sq", "Den df", "F value", "Pr(>F)"))
         if(attr(object$terms,"intercept")) table <- table[-1, ]

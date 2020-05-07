@@ -1,3 +1,5 @@
+# This functions create model matrices for diallel models
+# Date of last edit: 7/5/2020 
 model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
                                  fct, data, ML = F){
   mf <- match.call(expand.dots = FALSE) # Riprende la chiamata, con i nomi
@@ -21,14 +23,14 @@ if(is.null(Env) == T){
       # RAW DATA: Elaborazioni ######################################
       #attach(df)
       n <- length(Par1)
-      P1 <- factor(Par1)
-      P2 <- factor(Par2)
+      P1 <- factor(as.character(Par1))
+      P2 <- factor(as.character(Par2))
       nGroups <- 0
       groups <- c(nGroups)
       X <- cbind(Intercept = rep(1, n))
       reps <- c(1)
       namEffs <- c("Intercept")
-      
+
       if(is.null(Block) == F) {
         Block <- factor(Block)
         B <- matBlock(~Block)
@@ -39,29 +41,29 @@ if(is.null(Env) == T){
         reps <- c(reps, length(B[1,]))
         namEffs <- c(namEffs, "Block")
       }
-      
+
     if(fct == "HAYMAN1"){
       # HAYMAN1 - con tSCA #############################
       # 6/04/2020
 
       # Matrix for GCA
-      Z <- matGCA(P1, P2)
-      nams <- paste("j_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      Z <- GCA(P1, P2)
+      nams <- paste("g_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
 
-      # Matrix SCA
-      SCA <- matSCA(P1, P2)
-      colnames(SCA) <- paste("j_", colnames(SCA), sep = "")
+      # Matrix tSCA
+      SCA <- tSCA(P1, P2)
+      colnames(SCA) <- paste("ts_", colnames(SCA), sep = "")
 
       #Matrix for RGCA
-      RGCA <- matRGCA(P1, P2)
-      nams <- paste("k_", levels(P1)[1:length(levels(P1))-1], sep="")
+      RGCA <- RGCA(P1, P2)
+      nams <- paste("rg_", levels(P1)[1:length(levels(P1))-1], sep="")
       colnames(RGCA) <- c(nams)
-      
+
       #Matrix for RSCA
-      rec <- matRSCA(P1, P2)
-      colnames(rec) <- paste("k_", colnames(rec), sep = "")
+      rec <- RSCA(P1, P2)
+      colnames(rec) <- paste("rs_", colnames(rec), sep = "")
 
       # Building matrix (0:5)
       X <- cbind(X, Z, SCA, RGCA, rec)
@@ -74,36 +76,36 @@ if(is.null(Env) == T){
       namEffs <- c(namEffs, "GCA","SCA", "RGCA", "RSCA",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
-    
+
       } else if(fct == "HAYMAN2"){
       # HAYMAN2 - SCA decomposta ###########
       # 23/03/2020
-      
+
       # Matrix for crosses
-      crM <- matHbar(P1, P2)
-      colnames(crM) <- "Crosses"
+      crM <- matL(P1, P2)
+      colnames(crM) <- "l"
 
       # Matrix for GCA
-      Z <- matGCA(P1, P2)
+      Z <- GCA(P1, P2)
       nams <- paste("g_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
       # Matrix for h.i
-      H <- matHi(P1, P2)
-      nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      H <- matLi(P1, P2)
+      nams <- paste("l_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(H) <- c(nams)
 
       # Matrix for sca
-      SCA <- matSCA2(P1, P2)
+      SCA <- SCA(P1, P2)
       colnames(SCA) <- paste("l_", colnames(SCA), sep = "")
 
       # Matrix for RGCA
-      RGCA <- matRGCA(P1, P2)
+      RGCA <- RGCA(P1, P2)
       nams <- paste("k_", levels(P1)[1:length(levels(P1))-1], sep="")
       colnames(RGCA) <- c(nams)
 
       # Matrix for RSCA
-      rec <- matRSCA(P1, P2)
+      rec <- RSCA(P1, P2)
       colnames(rec) <- paste("k_", colnames(rec), sep = "")
 
       # Building incidence matrix (0:7)
@@ -118,22 +120,22 @@ if(is.null(Env) == T){
       namEffs <- c(namEffs, "GCA", "h", "hi", "SCA", "RGCA", "RSCA",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
-      
+
       } else if(fct == "GRIFFING1"){
 
       # GRIFFING 1 - Reciprocal effects #########################################
       #B <- matBlock(~Block)
 
-      Z <- matGCA(P1, P2)
+      Z <- GCA(P1, P2)
       nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
-      SCA <- matSCA(P1, P2)
+      SCA <- tSCA(P1, P2)
       colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
-      rec <- matRec(P1, P2)
+      rec <- REC(P1, P2)
       colnames(rec) <- paste("rsca_", colnames(rec), sep = "")
-      
+
       # Building incidence matrix (0:4)
       X <- cbind(X, Z, SCA, rec)
       groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
@@ -145,17 +147,17 @@ if(is.null(Env) == T){
       namEffs <- c(namEffs, "GCA", "SCA", "Reciprocals",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
-      
+
     } else if(fct == "GRIFFING2"){
       # GRIFFING 2 - No reciprocals #########################################
       # 23/03/2020
 
       #B <- matBlock(~Block)
-      
-      Z <- matGCA(P1, P2)
+
+      Z <- GCA(P1, P2)
       nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
-      SCA <- matSCA(P1, P2)
+      SCA <- tSCA(P1, P2)
       colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       # Building incidence matrix (0:3)
@@ -168,7 +170,7 @@ if(is.null(Env) == T){
       namEffs <- c(namEffs, "GCA", "SCA",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
-      
+
     } else if(fct == "GE2"){
       # GE2 - Senza reciproci ####################
       # 23/03/2020
@@ -179,19 +181,19 @@ if(is.null(Env) == T){
       colnames(crM) <- "h.bar"
 
       # Matrix for nu.i
-      Z <- matGCA.GE2(P1, P2)
+      Z <- matNui(P1, P2)
       nams <- paste("n_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
       # Matrix for h.i
-      H <- matHi.GE(P1, P2)
+      H <- matHi(P1, P2)
       nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(H) <- c(nams)
 
       # Matrix for sca
       SCA <- matSCA.GE(P1, P2)
       colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
-      
+
       # Building incidence matrix (0:5)
       X <- cbind(X, crM, Z, H, SCA)
       groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
@@ -203,7 +205,7 @@ if(is.null(Env) == T){
       namEffs <- c(namEffs, "h.bar", "GCA", "h.i", "SCA",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
-      
+
     } else if(fct == "GE2r"){
       # GE2r - With reciprocals ####################
       # 23/03/2020
@@ -218,11 +220,11 @@ if(is.null(Env) == T){
       # slM <- matHbar(crosses)
       # colnames(slM) <- "Selfs"
 
-      Z <- matGCA.GE2(P1, P2)
+      Z <- matNui(P1, P2)
       nams <- paste("n_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
-      H <- matHi.GE(P1, P2)
+      H <- matHi(P1, P2)
       nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(H) <- c(nams)
 
@@ -230,9 +232,9 @@ if(is.null(Env) == T){
       SCA <- matSCA.GE(P1, P2)
       colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
 
-      rec <- matRec(P1, P2)
+      rec <- REC(P1, P2)
       colnames(rec) <- paste("rec_", colnames(rec), sep = "")
-      
+
       # Building incidence matrix (0:6)
       X <- cbind(X, crM, Z, H, SCA, rec)
       groups <- c(groups, seq(nGroups+1, nGroups+5, 1))
@@ -264,14 +266,14 @@ if(is.null(Env) == T){
       nams <- paste("n_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
-      H <- matHi.GE(P1, P2)
+      H <- matHi(P1, P2)
       nams <- paste("g_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(H) <- c(nams)
 
       # Matrix for sca
       SCA <- matSCA.GE(P1, P2)
       colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
-      
+
       # Building incidence matrix (0:5)
       X <- cbind(X, crM, Z, H, SCA)
       groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
@@ -299,7 +301,7 @@ if(is.null(Env) == T){
       nams <- paste("n_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(Z) <- c(nams)
 
-      H <- matHi.GE(P1, P2)
+      H <- matHi(P1, P2)
       nams <- paste("g_", levels(P1)[1:(length(levels(P1))-1)], sep="")
       colnames(H) <- c(nams)
 
@@ -307,9 +309,9 @@ if(is.null(Env) == T){
       SCA <- matSCA.GE(P1, P2)
       colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
 
-      rec <- matRec(P1, P2)
+      rec <- REC(P1, P2)
       colnames(rec) <- paste("rec_", colnames(rec), sep = "")
-      
+
       # Building incidence matrix (0:6)
       X <- cbind(X, crM, Z, H, SCA, rec)
       groups <- c(groups, seq(nGroups+1, nGroups+5, 1))
@@ -338,7 +340,7 @@ if(is.null(Env) == T){
 
     # Creazione matrice incidenza (per ogni ambiente)
     matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
-              model.matriDiallel(~ df$Par1+df$Par2, df$Block,
+              model.matrixDiallel(~ df$Par1+df$Par2, df$Block,
                   fct = fct)})
     mats <- matsOr
     mats <- lapply(mats, function(x) x[, -1])
@@ -400,18 +402,43 @@ matBlock <- function(formula){
   B
   }
 
-matGCA <- function(P1, P2){
-  contrasts(P1) <- c("contr.sum")
-  contrasts(P2) <- c("contr.sum")
-  Z1 <- model.matrix(~P1)
-  Z2 <- model.matrix(~P2)
+# GCA.old <- function(P1, P2){
+#   P1 <- factor(as.character(P1))
+#   P2 <- factor(as.character(P2))
+#   contrasts(P1) <- c("contr.sum") #Parte da qui
+#   contrasts(P2) <- c("contr.sum")
+#   Z1 <- model.matrix(~P1)
+#   Z2 <- model.matrix(~P2)
+#   Z <- (Z1 + Z2)
+#   Z <- Z[,-1]
+#   Z
+# }
+
+GCA <- function(P1, P2){
+  # This is modified to work with mating design 4
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  levs <- c(levels(P1), levels(P2)) 
+  levs <- levels(factor(levs))
+  Z1n <- factor(P1, levels = levs, ordered = T)
+  Z2n <- factor(P2, levels = levs)
+  contrasts(Z1n) <- c("contr.sum")
+  contrasts(Z2n) <- c("contr.sum")
+  Z1 <- model.matrix(~ Z1n)
+  Z2 <- model.matrix(~ Z2n)
+  # contrasts(P1) <- c("contr.sum") #Parte da qui
+  # contrasts(P2) <- c("contr.sum")
+  # Z1 <- model.matrix(~P1)
+  # Z2 <- model.matrix(~P2)
   Z <- (Z1 + Z2)
   Z <- Z[,-1]
   Z
 }
 
-matGCA.GE2 <- function(P1, P2){
+matNui <- function(P1, P2){
   # For GE models
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   contrasts(P1) <- c("contr.sum")
   contrasts(P2) <- c("contr.sum")
   Z1 <- model.matrix(~P1)
@@ -423,6 +450,8 @@ matGCA.GE2 <- function(P1, P2){
 
 matGCA.GE3 <- function(P1, P2){
   # For GE3 models
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   P1c <- as.character(P1)
   P2c <- as.character(P2)
   selfs <- ifelse(P1c == P2c, 1, 0)
@@ -435,7 +464,9 @@ matGCA.GE3 <- function(P1, P2){
   Z
 }
 
-matRGCA <- function(P1, P2){
+RGCA <- function(P1, P2){
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   contrasts(P1) <- c("contr.sum")
   contrasts(P2) <- c("contr.sum")
   p <- length(levels(P1))
@@ -451,23 +482,27 @@ matRGCA <- function(P1, P2){
   RGCA
 }
 
-matRGCA2 <- function(P1, P2){
-  # Per ML estimation?
-  contrasts(P1) <- c("contr.sum")
-  contrasts(P2) <- c("contr.sum")
-  p <- length(levels(P1))
-  P1c <- as.character(P1)
-  P2c <- as.character(P2)
-  dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
-  Z1 <- model.matrix(~P1)[,-1]
-  Z2 <- model.matrix(~P2)[,-1]
-  colnames(Z1) <- paste("k_", c(1:(p-1)), sep="")
-  colnames(Z2) <- colnames(Z1)
-  RGCA <- cbind(Z1, Z2)
-}
+# RGCA2 <- function(P1, P2){
+#   # Per ML estimation?
+#   P1 <- factor(as.character(P1))
+#   P2 <- factor(as.character(P2))
+#   contrasts(P1) <- c("contr.sum")
+#   contrasts(P2) <- c("contr.sum")
+#   p <- length(levels(P1))
+#   P1c <- as.character(P1)
+#   P2c <- as.character(P2)
+#   dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
+#   Z1 <- model.matrix(~P1)[,-1]
+#   Z2 <- model.matrix(~P2)[,-1]
+#   colnames(Z1) <- paste("k_", c(1:(p-1)), sep="")
+#   colnames(Z2) <- colnames(Z1)
+#   RGCA <- cbind(Z1, Z2)
+# }
 
-matSCA <- function(P1, P2){
-  # Matrix tSCA: final version: 17/4/2020
+tSCA <- function(P1, P2){
+  # Matrix tSCA: final version: 6/5/2020
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   mating <- factor(P1n*10 + P2n)
@@ -524,8 +559,10 @@ matSCA <- function(P1, P2){
   SCA
 }
 
-matSCA2 <- function(P1, P2){
-  # Matrix for SCA in heterosis models Hayman2
+SCA <- function(P1, P2){
+  # Matrix for SCA in heterosis model Hayman2
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
     P1n <- as.numeric(P1); P2n <- as.numeric(P2)
     combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
     mating <- factor(P1n*10 + P2n)
@@ -602,6 +639,8 @@ matSCA2 <- function(P1, P2){
 
 matSCA.GE <- function(P1, P2){
   # SCA for GE models
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   mating <- factor(P1n*10 + P2n)
@@ -676,7 +715,7 @@ matSCA.GE <- function(P1, P2){
 }
 
 
-# matSCA <- function(combination, p){
+# SCA <- function(combination, p){
 #   # Step 1. gets the parameters to be estimated, removing
 #   # the unnecessary combinations
 #   n <- length(combination)
@@ -727,8 +766,10 @@ matSCA.GE <- function(P1, P2){
 #   SCA
 # }
 
-matRSCA <- function(P1, P2){
+RSCA <- function(P1, P2){
   # Derive the dummies and other infos
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   n <- length(P1)
   p <- length(levels(P1))
   P1n <- as.numeric(P1)
@@ -767,7 +808,9 @@ matRSCA <- function(P1, P2){
   }
 
 
-matRec <- function(P1, P2){
+REC <- function(P1, P2){
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   n <- length(P1)
   p <- length(levels(P1))
   P1n <- as.numeric(P1)
@@ -799,6 +842,8 @@ matRec <- function(P1, P2){
 }
 
 matHbar <- function(P1, P2){
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   P1c <- as.character(P1)
   P2c <- as.character(P2)
   cr <- ifelse(P1c == P2c, 0, 1)
@@ -811,20 +856,40 @@ matHbar <- function(P1, P2){
   crM
 }
 
-matHi <- function(P1, P2){
-  # For GE models ??
+matL <- function(P1, P2){
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  p <- length(levels(P1))
   P1c <- as.character(P1)
   P2c <- as.character(P2)
-  selfs <- ifelse(P1c == P2c, 1, 0)
-  contrasts(P1) <- c("contr.sum")
-  contrasts(P2) <- c("contr.sum")
-  Z1 <- model.matrix(~P1)
-  Z2 <- model.matrix(~P2)
-  H <- (Z1 + Z2) * selfs
-  H <- H[,-1]
+  cr <- ifelse(P1c == P2c, 0, 1)
+  cr <- factor(cr)
+  n <- length(cr)
+  contrasts(cr) <- c("contr.sum")
+  crM <- model.matrix(~cr)
+  crM <- crM[,-1]
+  crM <- ifelse(crM == 1, - (p - 1), 1)
+  if(is.vector(crM) == T) crM <- matrix(crM, n, 1)
+  crM
 }
-matHi.GE <- function(P1, P2){
-  # For GE models ??
+
+# matHi <- function(P1, P2){
+#   # For GE models ??
+#   P1c <- as.character(P1)
+#   P2c <- as.character(P2)
+#   selfs <- ifelse(P1c == P2c, 1, 0)
+#   contrasts(P1) <- c("contr.sum")
+#   contrasts(P2) <- c("contr.sum")
+#   Z1 <- model.matrix(~P1)
+#   Z2 <- model.matrix(~P2)
+#   H <- (Z1 + Z2) * selfs
+#   H <- H[,-1]
+# }
+
+matHi <- function(P1, P2){
+  # For GE2 and GE3 models
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   P1c <- as.character(P1)
   P2c <- as.character(P2)
   #selfs <- ifelse(P1c == P2c, 1, 0)
@@ -837,8 +902,11 @@ matHi.GE <- function(P1, P2){
   H <- H[,-1]
 }
 
-matHi2 <- function(P1, P2){
-  # For Hyman models
+        
+matLi <- function(P1, P2){
+  # For Hyman model 2
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
   p <- length(levels(P1))
   contrasts(P1) <- c("contr.sum")
   contrasts(P2) <- c("contr.sum")
