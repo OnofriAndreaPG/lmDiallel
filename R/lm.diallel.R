@@ -130,7 +130,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
         asgn <- object$assign[object$qr$pivot][p1]
         nmeffects <- c("(Intercept)", attr(object$terms, "term.labels"))
         if(any(class(object) == "diallel") == T) {tlabels <- object$namEff
-        } else {tlabels <- nmeffects[1 + unique(asgn)] 
+        } else {tlabels <- nmeffects[1 + unique(asgn)]
         nmeffects}
         ss <- c(unlist(lapply(split(comp^2,asgn), sum)), ssr)
         df <- c(lengths(split(asgn,  asgn)), dfr)
@@ -263,7 +263,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       f <- ms/MSE
       P <- pf(f, dfr, dfr1, lower.tail = FALSE)
       table <- data.frame(dfr, ss, ms, f, P)
-      print(table); print(length(P))
+      # print(table); print(length(P))
       table[length(P), 4:5] <- NA
       colnames(table) <- c("Df","Sum Sq", "Mean Sq", "F value", "Pr(>F)")
       row.names(table) <- labTab
@@ -271,7 +271,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
                                      paste("Response:", deparse(formula(object)[[2L]]))),
                   class = c("anova", "data.frame"))# was "tabular"
     } else {
-      # Non uso il residuo come errore, 
+      # Non uso il residuo come errore,
       ## ma quello fornito
       # print("OK")
       rss <- c()
