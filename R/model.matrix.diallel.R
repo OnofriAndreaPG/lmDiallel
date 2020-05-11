@@ -846,21 +846,25 @@ SCA.GE <- function(P1, P2){
 
 RSCA <- function(P1, P2){
   # Derive the dummies and other infos
+  # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   n <- length(P1)
   p <- length(levels(P1))
-  P1n <- as.numeric(P1)
-  P2n <- as.numeric(P2)
+  P1n <- as.numeric(P1); P2n <- as.numeric(P2)
   mate <- factor(P1n*10 + P2n)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+  P1c <- as.character(P1); P2c <- as.character(P2)
+  combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
+  
   # Empty matrix
-  rec <- matrix(0, nrow = n, ncol = (p - 1)*(p-2)/2 )
+  rec <- matrix(0, nrow = n, ncol = (p - 1)*(p - 2)/2 )
   cont <- 0
-  nams <- c()
+  nams <- c(); nams2 <- c()
   for(i in 1:(p-2)) { for(j in (i+1):(p-1)){
      cont <- cont + 1
-     nams[cont] <- paste(i,j, sep="")
+     nams[cont] <- paste(i, j, sep="")
+     nams2[cont] <- paste(levels(P1)[i], levels(P2)[j], sep = ":")
      }}
   colnames(rec) <- nams
 
@@ -882,24 +886,24 @@ RSCA <- function(P1, P2){
      rec[leftr==p & rightr == i, leftc == i] <- 1
      rec[leftr==p & rightr == i, rightc == i] <- -1
     }
-  colnames(rec) <- paste("rs_", colnames(rec), sep = "")
+  colnames(rec) <- paste("rs_", nams2, sep = "")
   rec
   }
 
 
 REC <- function(P1, P2){
+  # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   n <- length(P1)
   p <- length(levels(P1))
-  P1n <- as.numeric(P1)
-  P2n <- as.numeric(P2)
-  P1c <- as.character(P1)
-  P2c <- as.character(P2)
+  P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+  P1c <- as.character(P1); P2c <- as.character(P2)
   mate <- factor(P1n*10 + P2n)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
-
+  combLev <- factor( paste(P1c, P2c, sep = ":") )
+  
   last <- c(); cont = 1
   for(i in 1:p){ for(j in 1:i) { last[cont] <- paste(i, j, sep=""); cont = cont + 1 } }
   last <- as.numeric(last)
@@ -910,15 +914,18 @@ REC <- function(P1, P2){
     if(length(y) > 0) idx[i] <- y
     }
   levs <- as.character(levs[-idx])
-  levs
+  # levs
   rec <- matrix(0, nrow = n, ncol = length(levs))
   colnames(rec) <- paste(levs)
+  colNamsOrd <- levels(combLev)[-idx]
+  
     for(i in 1:length(levs)){
         cond <- (combination == colnames(rec)[i] ) * 1
         rec[, i] <- cond
     }
   rec <- rec*dr
-  colnames(rec) <- paste("r_", colnames(rec), sep = "")
+  # colnames(rec) <- paste("r_", colnames(rec), sep = "")
+  colnames(rec) <- paste("r_", colNamsOrd, sep = "")
   rec
 }
 
