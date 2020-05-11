@@ -48,22 +48,18 @@ if(is.null(Env) == T){
 
       # Matrix for GCA
       Z <- GCA(P1, P2)
-      nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
-
+      
 
       # Matrix tSCA
       SCA <- tSCA(P1, P2)
-      colnames(SCA) <- paste("tsca_", colnames(SCA), sep = "")
-
+      
       #Matrix for RGCA
       RGCA <- RGCA(P1, P2)
-      nams <- paste("rgca_", levels(P1)[1:length(levels(P1))-1], sep="")
-      colnames(RGCA) <- c(nams)
+      
 
       #Matrix for RSCA
       rec <- RSCA(P1, P2)
-      colnames(rec) <- paste("rsca_", colnames(rec), sep = "")
+      
 
       # Building matrix (0:5)
       X <- cbind(X, Z, SCA, RGCA, rec)
@@ -83,30 +79,28 @@ if(is.null(Env) == T){
 
       # Matrix for crosses
       crM <- MDD(P1, P2)
-      colnames(crM) <- "mdd"
+      
 
       # Matrix for GCA
       Z <- GCA(P1, P2)
-      nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(Z) <- c(nams)
 
       # Matrix for h.i
       H <- DD(P1, P2)
-      nams <- paste("dd_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(H) <- c(nams)
 
       # Matrix for sca
       SCA <- SCA(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      #colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       # Matrix for RGCA
       RGCA <- RGCA(P1, P2)
-      nams <- paste("rgca_", levels(P1)[1:length(levels(P1))-1], sep="")
-      colnames(RGCA) <- c(nams)
+      # nams <- paste("rgca_", levels(P1)[1:length(levels(P1))-1], sep="")
+      # colnames(RGCA) <- c(nams)
 
       # Matrix for RSCA
       rec <- RSCA(P1, P2)
-      colnames(rec) <- paste("rsca_", colnames(rec), sep = "")
+      # colnames(rec) <- paste("rsca_", colnames(rec), sep = "")
 
       # Building incidence matrix (0:7)
       X <- cbind(X, crM, Z, H, SCA, RGCA, rec)
@@ -127,14 +121,14 @@ if(is.null(Env) == T){
       #B <- matBlock(~Block)
 
       Z <- GCA(P1, P2)
-      nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(Z) <- c(nams)
 
       SCA <- tSCA(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       rec <- REC(P1, P2)
-      colnames(rec) <- paste("rec_", colnames(rec), sep = "")
+      # colnames(rec) <- paste("rec_", colnames(rec), sep = "")
 
       # Building incidence matrix (0:4)
       X <- cbind(X, Z, SCA, rec)
@@ -155,10 +149,10 @@ if(is.null(Env) == T){
       #B <- matBlock(~Block)
 
       Z <- GCA(P1, P2)
-      nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(Z) <- c(nams)
       SCA <- tSCA(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       # Building incidence matrix (0:3)
       X <- cbind(X, Z, SCA)
@@ -178,21 +172,20 @@ if(is.null(Env) == T){
 
       # Matrix for bar_h
       crM <- H.BAR(P1, P2)
-      colnames(crM) <- "h.bar"
+      # colnames(crM) <- "h.bar"
 
       # Matrix for nu.i
       Z <- VEi(P1, P2)
-      nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      # nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(Z) <- c(nams)
 
       # Matrix for h.i
       H <- Hi(P1, P2)
-      nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(H) <- c(nams)
+      
 
       # Matrix for sca
-      SCA <- SCA.GE(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      SCA <- SCA(P1, P2)
+      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       # Building incidence matrix (0:5)
       X <- cbind(X, crM, Z, H, SCA)
@@ -214,26 +207,26 @@ if(is.null(Env) == T){
 
       # Matrix for bar_h
       crM <- H.BAR(P1, P2)
-      colnames(crM) <- "h.bar"
+      # colnames(crM) <- "h.bar"
 
       # # Matrix for crosses
       # slM <- H.BAR(crosses)
       # colnames(slM) <- "Selfs"
 
       Z <- VEi(P1, P2)
-      nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      # nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(Z) <- c(nams)
 
       H <- Hi(P1, P2)
-      nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(H) <- c(nams)
+      # nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(H) <- c(nams)
 
       # Matrix for sca
-      SCA <- SCA.GE(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      SCA <- SCA(P1, P2)
+      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       rec <- REC(P1, P2)
-      colnames(rec) <- paste("rec_", colnames(rec), sep = "")
+      # colnames(rec) <- paste("rec_", colnames(rec), sep = "")
 
       # Building incidence matrix (0:6)
       X <- cbind(X, crM, Z, H, SCA, rec)
@@ -255,25 +248,22 @@ if(is.null(Env) == T){
       # Matrix for crosses
       #crM <- matrix(crosses, n, 1)
       crM <- H.BAR(P1, P2)
-      colnames(crM) <- "h.bar"
+      # colnames(crM) <- "h.bar"
 
       # Matrix for selfs
       # slM <- H.BAR(crosses)
       # colnames(slM) <- "Selfs"
       #
       # Matrix for GCA
-      
       H <- SP(P1, P2)
-      nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(H) <- c(nams)
+      
       
       Z <- GCAC(P1, P2)
-      nams <- paste("gcac_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      
 
       # Matrix for sca
-      SCA <- SCA.GE(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      SCA <- SCA(P1, P2)
+      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       # Building incidence matrix (0:5)
       X <- cbind(X, crM, H, Z, SCA)
@@ -296,22 +286,22 @@ if(is.null(Env) == T){
       # Matrix for crosses
       #crM <- matrix(crosses, n, 1)
       crM <- H.BAR(P1, P2)
-      colnames(crM) <- "h.bar"
+      # colnames(crM) <- "h.bar"
 
       Z <- GCAC(P1, P2)
-      nams <- paste("gcac_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(Z) <- c(nams)
+      # nams <- paste("gcac_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(Z) <- c(nams)
 
       H <- SP(P1, P2)
-      nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      colnames(H) <- c(nams)
+      # nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+      # colnames(H) <- c(nams)
 
       # Matrix for sca
-      SCA <- SCA.GE(P1, P2)
-      colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+      SCA <- SCA(P1, P2)
+      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       rec <- REC(P1, P2)
-      colnames(rec) <- paste("rec_", colnames(rec), sep = "")
+      #  colnames(rec) <- paste("rec_", colnames(rec), sep = "")
 
       # Building incidence matrix (0:6)
       X <- cbind(X, crM, Z, H, SCA, rec)
@@ -433,6 +423,9 @@ GCA <- function(P1, P2){
   # Z2 <- model.matrix(~P2)
   Z <- (Z1 + Z2)
   Z <- Z[,-1]
+  #nams <- paste("g_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+  nams <- paste("g_", levs[1:(length(levs)-1)], sep="")
+  colnames(Z) <- c(nams)
   Z
 }
 
@@ -446,6 +439,8 @@ VEi <- function(P1, P2){
   Z2 <- model.matrix(~P2)
   Z <- (Z1 + Z2)/2
   Z <- Z[,-1]
+  nams <- paste("v_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+  colnames(Z) <- c(nams)
   Z
 }
 
@@ -462,6 +457,8 @@ SP <- function(P1, P2){
   Z2 <- model.matrix(~P2)
   Z <- (Z1 + Z2)/2 * selfs
   Z <- Z[,-1]
+  nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+  colnames(Z) <- c(nams)
   Z
 }
 
@@ -480,6 +477,8 @@ RGCA <- function(P1, P2){
   RGCA[P1==p,] <- RGCA[P1==p,] - 1
   RGCA[P2==p,] <- RGCA[P2==p,] + 1
   RGCA <- RGCA[,-p]
+  nams <- paste("rg_", levels(P1)[1:length(levels(P1))-1], sep="")
+  colnames(RGCA) <- c(nams)
   RGCA
 }
 
@@ -506,6 +505,7 @@ tSCA <- function(P1, P2){
   P2 <- factor(as.character(P2))
   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+  combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
   mating <- factor(P1n*10 + P2n)
   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
   n <- length(combination)
@@ -523,7 +523,7 @@ tSCA <- function(P1, P2){
   levs <- as.character(levs[-idx])
   SCA <- matrix(0, nrow = n, ncol = length(levs))
   colnames(SCA) <- levs
-
+  colNamsOrd <- levels(combLev)[-idx]
   # Step 2. Insert 1s for all levels, but the last one
   for(i in 1:length(levs)){
     cond <- (combination == colnames(SCA)[i])*1
@@ -557,45 +557,118 @@ tSCA <- function(P1, P2){
   #SCA[combination == last[p],] <- - apply(SCA, 2, sum)
   SCA[combination == last[p],] <- 2
   for(i in 1:p) {SCA[combination == last[p], colnames(SCA) == paste(i, i, sep = "")] <- 1}
+  #colnames(SCA) <- paste("ts_", colnames(SCA), sep = "")
+  colnames(SCA) <- paste("ts_", colNamsOrd, sep = "")
   SCA
 }
 
+# tSCA <- function(P1, P2){
+#   # Matrix tSCA: final version: 6/5/2020
+#   # P1 <- df$Par1; P2 <- df$Par2
+#   P1 <- factor(as.character(P1))
+#   P2 <- factor(as.character(P2))
+#   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+#   P1c <- as.character(P1); P2c <- as.character(P2)
+#   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+#   combLev <- factor( ifelse(P1c > P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
+#   mating <- factor(P1n*10 + P2n)
+#   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
+#   n <- length(combination)
+# 
+#   # Step 1. gets the parameters to be estimated, removing
+#   # the unnecessary combinations
+#   last <- seq(10, p*10, 10) + p
+#   #levs <- as.numeric(levels(combination))
+#   levs <- levels(combination)
+#   idx <- c() # Identifica la posizione degli ultimi
+#    for(i in 1:length(last)){
+#        #i <- 2
+#        y <- which(levs == last[i])
+#        idx[i] <- y
+#   }
+#   levs <- as.character(levs[-idx])
+#   SCA <- matrix(0, nrow = n, ncol = length(levs))
+#   # colnames(SCA) <- levs
+#   colnames(SCA) <- as.character(combLev)[-idx]
+#   
+#   # Step 2. Insert 1s for all levels, but the last one
+#   for(i in 1:length(levs)){
+#     cond <- (combination == colnames(SCA)[i])*1
+#     SCA[, i] <- cond
+#    }
+#   # Step 3. Insert the -1s for the last level. The last level of
+#   # Par2, within each level of Par1. The last level of Par1
+#   # requires another step
+#   for(i in 1:(length(last) - 1)){
+#       start <- ceiling(ifelse(i == 1, 1, last[i-1])/10) * 10 +1
+#       arrival <- last[i]
+#       sel <- seq(start, arrival, 1)
+#       tmp <- as.character( sel[1:i] ) # Se necessario, inverte i reciproci
+#       splits <- strsplit(tmp, "")
+#       reversed <- lapply(splits, rev)
+#       tmp <- as.character(lapply(reversed, paste, collapse = ""))
+#       sel[1:i] <- as.numeric(tmp)
+#       sel
+#       idx <- c() # Identifica la posizione di quelli da scrivere
+#       for(j in 1:length(sel)){
+#            #i <- 7
+#            y <- which(levs == sel[j])
+#            if(length(y) > 0) idx[j] <- y
+#       }
+#       idx
+#       SCA[,idx]
+#       idx1 <- last[i]
+#       SCA[combination == idx1, idx] <- -1
+#   }
+#   # Scrive il self dell'ultimo livello
+#   #SCA[combination == last[p],] <- - apply(SCA, 2, sum)
+#   SCA[combination == last[p],] <- 2
+#   for(i in 1:p) {SCA[combination == last[p], colnames(SCA) == paste(i, i, sep = "")] <- 1}
+#   colnames(SCA) <- paste("ts_", colnames(SCA), sep = "")
+#   SCA
+# }
+
 SCA <- function(P1, P2){
   # Matrix for SCA in heterosis model Hayman2
+  # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
-    P1n <- as.numeric(P1); P2n <- as.numeric(P2)
-    combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
-    mating <- factor(P1n*10 + P2n)
-    p <- length(levels(factor(c(levels(P1), levels(P2)) )))
-    n <- length(combination)
-    last <- seq(10, p*10, 10) + p
-    levs <- as.numeric(levels(combination))
-    idx1 <- c()
-    for(i in 1:length(last)){ #Indica l'ultimo
+  P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+  combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+  combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
+  mating <- factor(P1n*10 + P2n)
+  p <- length(levels(factor(c(levels(P1), levels(P2)) )))
+  n <- length(combination)
+  last <- seq(10, p*10, 10) + p
+  levs <- as.numeric(levels(combination))
+  idx1 <- c()
+  for(i in 1:length(last)){ #Indica l'ultimo
          y <- which(levs == last[i])
          idx1[i] <- y
-    }
-    idx2 <- c()
-    for(i in 1:length(last)){ #Indica il penultimo
+  }
+  idx2 <- c()
+  for(i in 1:length(last)){ #Indica il penultimo
           y <- which(levs == (last[i] - 1))
           if(length(y) > 0) idx2[i] <- y
-      }
-    selflist <- as.numeric(levels(factor(combination[P1n == P2n])))
-    idx3 <- c()
-    for(i in 1:length(selflist)){ #Indica il penultimo
+  }
+  selflist <- as.numeric(levels(factor(combination[P1n == P2n])))
+  idx3 <- c()
+  for(i in 1:length(selflist)){ #Indica il penultimo
           #i <- 2
           y <- which(levs == selflist[i])
           if(length(y) > 0) idx3[i] <- y
-      }
+  }
 
-    idx <- c(idx1, idx3)
-    rimossi <- levs[idx]
-    levs <- as.character(levs[-idx])
-    rimossi <- c(rimossi, levs[length(levs)])
-    levs <- levs[-length(levs)]
-    SCA <- matrix(0, nrow = n, ncol = length(levs))
-    colnames(SCA) <- paste(levs)
+  idx <- c(idx1, idx3)
+  rimossi <- levs[idx]
+  levs <- as.character(levs[-idx])
+  rimossi <- c(rimossi, levs[length(levs)])
+  levs <- levs[-length(levs)]
+  SCA <- matrix(0, nrow = n, ncol = length(levs))
+  colnames(SCA) <- paste(levs)
+  #colnames(SCA)
+  colNamsOrd <- levels(combLev)[-idx][-length(levels(combLev)[-idx])]
+    
     # Step 2. Insert 1s for all the levels, which are
     # in the SCA matrix
     for(i in 1:length(levs)){
@@ -635,6 +708,8 @@ SCA <- function(P1, P2){
      SCA[combination == tmp[1], ] <- -1
      SCA[combination == tmp[2], ] <- SCA[combination == tmp[2], ] + 1
      SCA[combination == tmp[3], ] <- SCA[combination == tmp[3], ] + 1
+     #colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
+     colnames(SCA) <- paste("s_", colNamsOrd, sep = "")
      SCA
 }
 
@@ -805,6 +880,7 @@ RSCA <- function(P1, P2){
      rec[leftr==p & rightr == i, leftc == i] <- 1
      rec[leftr==p & rightr == i, rightc == i] <- -1
     }
+  colnames(rec) <- paste("rs_", colnames(rec), sep = "")
   rec
   }
 
@@ -840,6 +916,8 @@ REC <- function(P1, P2){
         rec[, i] <- cond
     }
   rec <- rec*dr
+  colnames(rec) <- paste("r_", colnames(rec), sep = "")
+  rec
 }
 
 H.BAR <- function(P1, P2){
@@ -854,6 +932,7 @@ H.BAR <- function(P1, P2){
   crM <- model.matrix(~cr)
   crM <- crM[,-1]
   if(is.vector(crM) == T) crM <- matrix(crM, n, 1)
+  colnames(crM) <- "h.bar"
   crM
 }
 
@@ -871,6 +950,7 @@ MDD <- function(P1, P2){
   crM <- crM[,-1]
   crM <- ifelse(crM == 1, - (p - 1), 1)
   if(is.vector(crM) == T) crM <- matrix(crM, n, 1)
+  colnames(crM) <- "m"
   crM
 }
 
@@ -901,6 +981,9 @@ Hi <- function(P1, P2){
   Z2 <- model.matrix(~P2)
   H <- (Z1 + Z2) * crosses
   H <- H[,-1]
+  nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+  colnames(H) <- c(nams)
+  H    
 }
 
 GCAC <- function(P1, P2){
@@ -917,6 +1000,9 @@ GCAC <- function(P1, P2){
   Z2 <- model.matrix(~P2)
   H <- (Z1 + Z2) * crosses
   H <- H[,-1]
+  nams <- paste("gc_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+  colnames(H) <- c(nams)
+  H
 }
 
         
@@ -933,9 +1019,8 @@ DD <- function(P1, P2){
   H[H == 2] <- -(p - 2)
   H[H == -2] <- (p - 2)
   H <- H[,-1]
+  nams <- paste("d_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+  colnames(H) <- c(nams)
   H
-  #nams <- paste("l_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-        # colnames(H) <- c("temp", nams)
-        #
 }
 
