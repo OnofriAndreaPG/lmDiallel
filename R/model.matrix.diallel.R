@@ -503,6 +503,7 @@ tSCA <- function(P1, P2){
   # Matrix tSCA: final version: 6/5/2020
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
+  P1c <- as.character(P1); P2c <- as.character(P2)
   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
@@ -634,6 +635,7 @@ SCA <- function(P1, P2){
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+  P1c <- as.character(P1); P2c <- as.character(P2)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
   mating <- factor(P1n*10 + P2n)
