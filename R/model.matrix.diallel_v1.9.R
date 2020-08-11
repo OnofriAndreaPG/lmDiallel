@@ -1,9 +1,16 @@
 # This functions create model matrices for diallel models
-# Date of last edit: 7/5/2020 
+# Date of last edit: 23/6/2020
 model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
-                                 fct, data, ML = F){
+                                 fct = NULL, data = NULL, ML = F){
+  if(is.null(fct)){
+    # This is a formula based output ###############
+    X1 <- model.matrix(formula, data)
+    X <- X1[,-1]
+    attr(X, "assign") <- attr(X1, "assign")[-1]
+  } else {
+  # fct based output #############################
   mf <- match.call(expand.dots = FALSE) # Riprende la chiamata, con i nomi
-  m <- match(c("formula", "data"), names(mf), 0L) # Trova nella chiamata la formula. m è la posizione della formula nella chiamata
+  m <- match(c("formula", "Block", "Env", "data"), names(mf), 0L) # Trova nella chiamata la formula. m è la posizione della formula nella chiamata
   mf <- mf[c(1L, m)]
   mf$drop.unused.levels <- TRUE
   mf[[1L]] <- quote(stats::model.frame)
@@ -11,6 +18,11 @@ model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
   mt <- attr(mf, "terms")
   pars <- attr(mt, "term.labels")
 
+  bName <- deparse(substitute(Block))  # storing name of Blocks
+  Block <- model.extract(mf, "Block")
+  eName <- deparse(substitute(Env))  # storing name of Env
+  Env <- model.extract(mf, "Env")
+  
   if(missing(data) == T){
     Par1 <- mf[,1]
     Par2 <- mf[,2]
@@ -20,8 +32,6 @@ model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
   }
 
 if(is.null(Env) == T){
-      # RAW DATA: Elaborazioni ######################################
-      #attach(df)
       n <- length(Par1)
       P1 <- factor(as.character(Par1))
       P2 <- factor(as.character(Par2))
@@ -48,18 +58,18 @@ if(is.null(Env) == T){
 
       # Matrix for GCA
       Z <- GCA(P1, P2)
-      
+
 
       # Matrix tSCA
       SCA <- tSCA(P1, P2)
-      
+
       #Matrix for RGCA
       RGCA <- RGCA(P1, P2)
-      
+
 
       #Matrix for RSCA
       rec <- RSCA(P1, P2)
-      
+
 
       # Building matrix (0:5)
       X <- cbind(X, Z, SCA, RGCA, rec)
@@ -79,7 +89,7 @@ if(is.null(Env) == T){
 
       # Matrix for crosses
       crM <- MDD(P1, P2)
-      
+
 
       # Matrix for GCA
       Z <- GCA(P1, P2)
@@ -181,7 +191,7 @@ if(is.null(Env) == T){
 
       # Matrix for h.i
       H <- Hi(P1, P2)
-      
+
 
       # Matrix for sca
       SCA <- SCA(P1, P2)
@@ -256,10 +266,10 @@ if(is.null(Env) == T){
       #
       # Matrix for GCA
       H <- SP(P1, P2)
-      
-      
+
+
       Z <- GCAC(P1, P2)
-      
+
 
       # Matrix for sca
       SCA <- SCA(P1, P2)
@@ -351,7 +361,7 @@ if(is.null(Env) == T){
     asgn <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn))
     attr(X, "assign") <- asgn
     attr(X, "namEff") <- as.character( unlist( lapply(matsOr, function(x) attr(x, "namEff"))[1] ) )
-  }
+  }}
   return(X)
 }
 
@@ -405,11 +415,17 @@ matBlock <- function(formula){
 #   Z
 # }
 
-GCA <- function(P1, P2){
+GCA <- function(P1, P2, data = NULL){
   # This is modified to work with mating design 4
+  if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
-  levs <- c(levels(P1), levels(P2)) 
+  levs <- c(levels(P1), levels(P2))
   levs <- levels(factor(levs))
   Z1n <- factor(P1, levels = levs, ordered = T)
   Z2n <- factor(P2, levels = levs)
@@ -429,7 +445,13 @@ GCA <- function(P1, P2){
   Z
 }
 
-VEi <- function(P1, P2){
+VEi <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # For GE2 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -444,7 +466,13 @@ VEi <- function(P1, P2){
   Z
 }
 
-SP <- function(P1, P2){
+SP <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # For GE3 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -462,7 +490,13 @@ SP <- function(P1, P2){
   Z
 }
 
-RGCA <- function(P1, P2){
+RGCA <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   contrasts(P1) <- c("contr.sum")
@@ -499,7 +533,13 @@ RGCA <- function(P1, P2){
 #   RGCA <- cbind(Z1, Z2)
 # }
 
-tSCA <- function(P1, P2){
+tSCA <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # Matrix tSCA: final version: 6/5/2020
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -575,7 +615,7 @@ tSCA <- function(P1, P2){
 #   mating <- factor(P1n*10 + P2n)
 #   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
 #   n <- length(combination)
-# 
+#
 #   # Step 1. gets the parameters to be estimated, removing
 #   # the unnecessary combinations
 #   last <- seq(10, p*10, 10) + p
@@ -591,7 +631,7 @@ tSCA <- function(P1, P2){
 #   SCA <- matrix(0, nrow = n, ncol = length(levs))
 #   # colnames(SCA) <- levs
 #   colnames(SCA) <- as.character(combLev)[-idx]
-#   
+#
 #   # Step 2. Insert 1s for all levels, but the last one
 #   for(i in 1:length(levs)){
 #     cond <- (combination == colnames(SCA)[i])*1
@@ -629,7 +669,13 @@ tSCA <- function(P1, P2){
 #   SCA
 # }
 
-SCA <- function(P1, P2){
+SCA <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # Matrix for SCA in heterosis model Hayman2
   # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
@@ -670,7 +716,7 @@ SCA <- function(P1, P2){
   colnames(SCA) <- paste(levs)
   #colnames(SCA)
   colNamsOrd <- levels(combLev)[-idx][-length(levels(combLev)[-idx])]
-    
+
     # Step 2. Insert 1s for all the levels, which are
     # in the SCA matrix
     for(i in 1:length(levs)){
@@ -715,7 +761,13 @@ SCA <- function(P1, P2){
      SCA
 }
 
-SCA.GE <- function(P1, P2){
+SCA.GE <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # SCA for GE models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -844,7 +896,13 @@ SCA.GE <- function(P1, P2){
 #   SCA
 # }
 
-RSCA <- function(P1, P2){
+RSCA <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # Derive the dummies and other infos
   # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
@@ -856,7 +914,7 @@ RSCA <- function(P1, P2){
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   P1c <- as.character(P1); P2c <- as.character(P2)
   combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
-  
+
   # Empty matrix
   rec <- matrix(0, nrow = n, ncol = (p - 1)*(p - 2)/2 )
   cont <- 0
@@ -891,7 +949,13 @@ RSCA <- function(P1, P2){
   }
 
 
-REC <- function(P1, P2){
+REC <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -903,7 +967,7 @@ REC <- function(P1, P2){
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
   dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
   combLev <- factor( paste(P1c, P2c, sep = ":") )
-  
+
   last <- c(); cont = 1
   for(i in 1:p){ for(j in 1:i) { last[cont] <- paste(i, j, sep=""); cont = cont + 1 } }
   last <- as.numeric(last)
@@ -918,7 +982,7 @@ REC <- function(P1, P2){
   rec <- matrix(0, nrow = n, ncol = length(levs))
   colnames(rec) <- paste(levs)
   colNamsOrd <- levels(combLev)[-idx]
-  
+
     for(i in 1:length(levs)){
         cond <- (combination == colnames(rec)[i] ) * 1
         rec[, i] <- cond
@@ -929,7 +993,13 @@ REC <- function(P1, P2){
   rec
 }
 
-H.BAR <- function(P1, P2){
+H.BAR <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   P1c <- as.character(P1)
@@ -945,7 +1015,13 @@ H.BAR <- function(P1, P2){
   crM
 }
 
-MDD <- function(P1, P2){
+MDD <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   p <- length(levels(P1))
@@ -976,7 +1052,13 @@ MDD <- function(P1, P2){
 #   H <- H[,-1]
 # }
 
-Hi <- function(P1, P2){
+Hi <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # For GE2 and GE3 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -992,10 +1074,16 @@ Hi <- function(P1, P2){
   H <- H[,-1]
   nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   colnames(H) <- c(nams)
-  H    
+  H
 }
 
-GCAC <- function(P1, P2){
+GCAC <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # For GE2 and GE3 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -1014,8 +1102,14 @@ GCAC <- function(P1, P2){
   H
 }
 
-        
-DD <- function(P1, P2){
+
+DD <- function(P1, P2, data = NULL){
+    if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
   # For Hyman model 2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))

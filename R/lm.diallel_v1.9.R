@@ -1,5 +1,5 @@
 # Wrapper for lm and diallel models
-# Last edited: 7/5/2020
+# Last edited: 23/6/2020
 lm.diallel <- function(formula, Block = NULL, Env = NULL,
                        fct = "GRIFFING2", data,
                        ML = FALSE){
@@ -26,12 +26,21 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
 
   eName <- deparse(substitute(Env))  # storing name of Env
   Env <- model.extract(mf, "Env")
-
+  
   pars <- attr(mt, "term.labels")
-  Par1 <- data[[pars[1]]]
-  Par2 <- data[[pars[2]]]
-  X <- model.matrixDiallel(~Par1 + Par2, Block, Env = Env, fct = fct)
-  #print(head(X))
+  if(missing(data) == T){
+    Par1 <- mf[,2]
+    Par2 <- mf[,3]
+  } else {
+    Par1 <- data[[pars[1]]]
+    Par2 <- data[[pars[2]]]
+  }
+  # Par1 <- data[[pars[1]]]
+  # Par2 <- data[[pars[2]]]
+  # print(Block); print(Env); stop()
+  # print(mf); stop()
+  X <- model.matrixDiallel(~Par1 + Par2, Block=Block, Env = Env, fct = fct)
+  # print(head(X))
   z <- lm.fit(X, Y)
   if(ML == T){
     if(fct == "HAYMAN1") {
