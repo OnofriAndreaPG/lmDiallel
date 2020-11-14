@@ -602,6 +602,7 @@ tSCA <- function(P1, P2, data = NULL){
   for(i in 1:p) {SCA[combination == last[p], colnames(SCA) == paste(i, i, sep = "")] <- 1}
   #colnames(SCA) <- paste("ts_", colnames(SCA), sep = "")
   colnames(SCA) <- paste("ts_", colNamsOrd, sep = "")
+  row.names(SCA) <- c(1:length(SCA[,1]))
   SCA
 }
 
