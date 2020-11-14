@@ -22,7 +22,7 @@ model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
   Block <- model.extract(mf, "Block")
   eName <- deparse(substitute(Env))  # storing name of Env
   Env <- model.extract(mf, "Env")
-  
+
   if(missing(data) == T){
     Par1 <- mf[,1]
     Par2 <- mf[,2]
@@ -491,7 +491,7 @@ SP <- function(P1, P2, data = NULL){
 }
 
 RGCA <- function(P1, P2, data = NULL){
-    if(!is.null(data)){
+  if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
@@ -501,7 +501,8 @@ RGCA <- function(P1, P2, data = NULL){
   P2 <- factor(as.character(P2))
   contrasts(P1) <- c("contr.sum")
   contrasts(P2) <- c("contr.sum")
-  p <- length(levels(P1))
+  # p <- length(levels(P1))
+  p <- levels(P1)[length(levels(P1))] #Correction 14/11/20. AO
   P1c <- as.character(P1)
   P2c <- as.character(P2)
   dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
@@ -510,7 +511,8 @@ RGCA <- function(P1, P2, data = NULL){
   RGCA <- (Z3 - Z4) #* -dr
   RGCA[P1==p,] <- RGCA[P1==p,] - 1
   RGCA[P2==p,] <- RGCA[P2==p,] + 1
-  RGCA <- RGCA[,-p]
+  # RGCA <- RGCA[,-p]
+  RGCA <- RGCA[,-length(levels(P1))] ##Correction 14/11/20. AO
   nams <- paste("rg_", levels(P1)[1:length(levels(P1))-1], sep="")
   colnames(RGCA) <- c(nams)
   RGCA
