@@ -6,6 +6,7 @@ importFrom("stats", ".getXlevels", "coef", "coefficients",
                 "model.response", "optim", "pf", "pt")
      importFrom("utils", "combn")
 export(model.matrixDiallel, lm.diallel, matBlock,
+       model.matrix.diallel,
        GCA, VEi, SP, RGCA, tSCA, SCA.GE, RSCA,
        REC, H.BAR, MDD, Hi, GCAC, DD)
 
@@ -14,3 +15,4 @@ S3method(summary, diallel)
 S3method(vcov, diallel)
 S3method(anova, diallel)
 S3method(predict, diallel)
+S3method(model.matrix, diallel)

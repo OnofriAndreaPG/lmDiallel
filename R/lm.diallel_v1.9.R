@@ -26,7 +26,7 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
 
   eName <- deparse(substitute(Env))  # storing name of Env
   Env <- model.extract(mf, "Env")
-  
+
   pars <- attr(mt, "term.labels")
   if(missing(data) == T){
     Par1 <- mf[,2]
@@ -108,17 +108,27 @@ summary.diallel <- function (object, correlation = FALSE, symbolic.cor = FALSE,
   }
 }
 
-vcov.diallel <- function(object, ...)
+vcov.diallel <- function(object, MSE = NULL, ...)
 {
     so <- summary(object)
-    so$sigma^2 * so$cov.unscaled
+    if(is.na(so$sigma) & is.null(MSE)){
+      print("No variance estimate is available")
+      retVal <- NA
+    } else if(is.na(so$sigma) == T & is.null(MSE) == F){
+      retVal <- MSE * so$cov.unscaled
+    } else if(is.na(so$sigma) == F & is.null(MSE) == F){
+      retVal <- MSE * so$cov.unscaled
+    } else if(is.na(so$sigma) == F & is.null(MSE) == T){
+      retVal <- so$sigma^2 * so$cov.unscaled
+    }
+    retVal
 }
 
 anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 {
   if(is.null(object$Env)) {object$Env <- FALSE }
   if(object$Env == F){
-    ## Se non c'è MSE esplicito: uso del residuo come errore ####
+    ## Se non c'è MSE esplicito: uso del residuo come errore
     ## Do not copy this: anova.lmlist is not an exported object.
     ## See anova.glm for further comments.
 
@@ -175,7 +185,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 	     class = c("anova", "data.frame"))# was "tabular"
 
     } else if(object$Env == F & (object$fct == "GE2" | object$fct == "GE2r")) {
-    ## Analisi senza blocco, per GE2 e GE2r ####
+    ## Analisi senza blocco, per GE2 e GE2r
     ## Deve ricalcolare in modo diverso
     ssr <- sum(object$residuals^2)
     if(!is.null(MSE)) dfr1 <- dfr
@@ -210,7 +220,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       }
       #table
     }else if(object$Env == T) {
-      # Analisi con anno ############
+      # Analisi con anno
       X <- object$modMatrix
       Y <- object$response
       namEff <- object$namEff
