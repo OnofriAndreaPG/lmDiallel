@@ -1,12 +1,14 @@
 exportPattern("^[[:alpha:]]+")
 importFrom("plyr", "ldply")
+import(multcomp)
 importFrom("stats", ".getXlevels", "coef", "coefficients",
                 "contrasts<-", "deviance", "df", "df.residual", "dnorm",
                 "formula", "lm", "lm.fit", "model.extract", "model.matrix",
                 "model.response", "optim", "pf", "pt")
      importFrom("utils", "combn")
 export(model.matrixDiallel, lm.diallel, matBlock,
-       model.matrix.diallel,
+       model.matrix.diallel, vcov.diallel, summary.diallel,
+       anova.diallel, glht.diallelMod, diallel.eff,
        GCA, VEi, SP, RGCA, tSCA, SCA.GE, RSCA,
        REC, H.BAR, MDD, Hi, GCAC, DD)
 
@@ -16,3 +18,4 @@ S3method(vcov, diallel)
 S3method(anova, diallel)
 S3method(predict, diallel)
 S3method(model.matrix, diallel)
+S3method(glht, diallelMod)

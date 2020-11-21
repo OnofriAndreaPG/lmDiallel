@@ -67,6 +67,7 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
 
   z$fct <- fct
   z$Env <- ifelse(is.null(Env), F, T)
+  z$Block <- ifelse(is.null(Block), F, T)
   z$na.action <- attr(mf, "na.action")
   z$offset <- NULL
     #z$contrasts <- attr(x, "contrasts")
@@ -112,8 +113,8 @@ vcov.diallel <- function(object, MSE = NULL, ...)
 {
     so <- summary(object)
     if(is.na(so$sigma) & is.null(MSE)){
-      print("No variance estimate is available")
-      retVal <- NA
+      cat("No residual variance estimate is available")
+      stop() #retVal <- NA
     } else if(is.na(so$sigma) == T & is.null(MSE) == F){
       retVal <- MSE * so$cov.unscaled
     } else if(is.na(so$sigma) == F & is.null(MSE) == F){
