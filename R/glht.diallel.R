@@ -41,106 +41,34 @@ gen.eff <- function(obj){
     X <- X[apply(X, 1, function(x) !all(x==0)),]
     return(X)
   }
-# Yield <- c(12, 13, 14, 11, 15, 21, 17, 16, 19)
-# Par1 <- c("A", "A", "A", "B", "B", "B", "C", "C", "C") #father
-# Par2 <- c("A", "B", "C", "A", "B", "C","A", "B", "C") #mother
-# df <- data.frame(Par1, Par2, Yield)
-# rm(Yield, Par1, Par2)
-# df
-# library(lmDiallel)
-# dMod2 <- lm.diallel(Yield ~ Par1 + Par2, data = df, fct = "HAYMAN1")
-# obj <- dMod2
-# summary(dMod2)
-#
-# GEeff(dMod2)
-#
-# str(dMod2)
-# GCAeff(df$Par1, df$Par2)
-# P1 <- c("A", "A", "B") #father
-# P2 <- c("B", "C", "C") #mother
 
 diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
+  if(all(class(obj) != "diallel")) {
+    cat("This method works only with diallel objects")
+    stop()
+  }
 
     k <- gen.eff(obj)
-    linfct.list <- list(linfct = k, MSE = MSE, dfr = dfr)
+    linfct.list <- list(linfct = k, MSE = MSE, dfr = dfr, obj = obj)
     class(linfct.list) <- "diallelMod"
-    # attr(linfct, "MSE") <- MSE
-    # attr(linfct, "dfr") <- dfr
-    # class(linfct) <- "diallelMod"
-    # print(linfct)
     return(linfct.list)
-    # linfct <- list(...)
-    #
-    # linfct <- lapply(linfct, function(x) {
-    #     if (is.numeric(x) && !is.matrix(x)) {
-    #         return(matrix(x, nrow = 1))
-    #     } else {
-    #         return(x)
-    #     }})
-    #
-    # if (is.null(names(linfct)))
-    #     stop(sQuote("linfct"), " doesn't have a ", sQuote("names"),
-    #          " attribute")
-    #
-    # classes <- sapply(linfct, function(x) inherits(x, "matrix") ||
-    #                                       inherits(x, "character"))
-    #
-    # if (length(linfct) == 1 && linfct[[1]] == "Means") {
-    #     class(linfct) <- "means"
-    #     return(linfct)
-    # }
-    #
-    # attr(linfct, "interaction_average") <- interaction_average
-    # attr(linfct, "covariate_average") <- covariate_average
-    #
-    # if (all(classes)) {
-    #     class(linfct) <- "mcp"
-    #     return(linfct)
-    # }
-    #
-    # stop("Arguments don't consist of either matrices or characters")
 }
 
 
 ### multiple comparison procedures
-glht.diallelMod <- function(obj, linfct, ...) {
+glht.diallelMod <- function(linfct, ...) {
 
     ### extract factors and contrast matrices from `model'
+    obj <- linfct$obj
     MSE <- linfct$MSE
     dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
     k <- linfct$linfct
+
     coefMod <- coef(obj)
     vcovMod <- vcov(obj, MSE = MSE)
     args <- list(coef = coefMod, vcov = vcovMod, df = 26)
     class(args) <- "parm"
-    # k <- matrix(linfct, nrow(linfct), ncol(linfct))
-    # row.names(k) <- row.names(linfct)
-    # print(args)
-    # args <- list(model = args, linfct = k)
-
     ret <- multcomp::glht(args, k)
-    # summary(ret)
     return(ret)
-    # # print(args)
-    # ret <- glht(args, linfct)
 
-    # if (ia || ca) {
-    #     ### experimental version
-    #     tmp <- mcp2matrix2(model, linfct = linfct, interaction_average = ia,
-    #                        covariate_average = ca)
-    # } else {
-    #     ### use old version
-    #     tmp <- mcp2matrix(model, linfct = linfct)
-    # }
-    # args <- list(model = model, linfct = tmp$K)
-    # if (!is.null(tmp$alternative))
-    #     args$alternative <- tmp$alternative
-    # if (any(tmp$m != 0))
-    #     args$rhs <- tmp$m
-    # args <- c(args, list(...))
-
-    # ret <- do.call("glht", args)
-    # ret$type <- tmp$type
-    # ret$focus <- names(linfct)
-    # return(ret)
 }
