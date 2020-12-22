@@ -13,7 +13,8 @@ REC(x,y,data)
 \arguments{
 \item{x}{\code{a variable for the first parent}}
   \item{y}{\code{a variable for the second parent}}
-  \item{data}{\code{a 'data.frame' where to look for explanatory variables}}
+  \item{data}{\code{a 'data.frame' where to look for explanatory variables}}}
+
 \details{
 a design matrix of n-1 parentals
 }
@@ -36,27 +37,6 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\describe{
-\item{\code{\code{\link{model.matrixDiallel}}}}
-\item{\code{\code{\link{lm.diallel}}}}
-\item{\code{\code{\link{SCA}}}}
-\item{\code{\code{\link{tSCA}}}}
-\item{\code{\code{\link{GCA}}}}
-\item{\code{\code{\link{GCAC}}}}
-\item{\code{\code{\link{RSCA}}}}
-\item{\code{\code{\link{RGCA}}}}
-\item{\code{\code{\link{SP}}}}
-\item{\code{\code{\link{Hi}}}}
-\item{\code{\code{\link{H.BAR}}}}
-\item{\code{\code{\link{Vei}}}}
-\item{\code{\code{\link{DD}}}}
-\item{\code{\code{\link{MDD}}}}
-\item{\code{\code{\link{summary.diallel}}}}
-\item{\code{\code{\link{anova.diallel}}}}
-\item{\code{\code{\link{matBlock}}}}
-}}
-}
 \examples{
 data("hayman54")
 dMod<-lm(Ftime~ Block + GCA(Par1,Par2)
@@ -66,5 +46,4 @@ anova(dMod)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ ~diallel }% use one of  RShowDoc("KEYWORDS")

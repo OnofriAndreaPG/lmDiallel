@@ -20,7 +20,7 @@ model.matrixDiallel(formula, Block, Env, data, fct)
 \item{data}{a 'data.frame' where to look for explanatory variables}
 \item{fct}{a string variable coding for the selected model. 6 main diallel models: Hayman's model 1 (="HAYMAN1"), Hayman's model 2 (="HAYMAN2"), Griffing's model 1 (="GRIFFING1"), Griffing's model 2 (="GRIFFING2"), Gardner-Eberhart model 2 (="GE2")  and Gardner-Eberhart model 3 (="GE3"). The strings "GE2r" and "GE3r" can be used to specify the 'enhanced' GE2 and GE3 models, including the effect of reciprocals (REC).}
 }
-}
+
 \details{
 RIGUARDARE
 model.matrixDiallel creates a design matrix from the description given in terms(object), using the data in data which must supply variables with the same names as would be created by a call to model.frame(object) or, more precisely, by evaluating attr(terms(object), "variables"). If data is a data frame, there may be other columns and the order of columns is not important. Any character variables are coerced to factors. After coercion, all the variables used on the right-hand side of the formula must be logical, integer, numeric or factor.
@@ -51,26 +51,6 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\describe{
-\item{\code{\code{\link{model.matrix}}}}
-\item{\code{\code{\link{lm.diallel}}}}
-\item{\code{\code{\link{RSCA}}}}
-\item{\code{\code{\link{tSCA}}}}
-\item{\code{\code{\link{GCA}}}}
-\item{\code{\code{\link{GCAC}}}}
-\item{\code{\code{\link{RGCA}}}}
-\item{\code{\code{\link{REC}}}}
-\item{\code{\code{\link{SP}}}}
-\item{\code{\code{\link{DD}}}}
-\item{\code{\code{\link{MDD}}}}
-\item{\code{\code{\link{Hi}}}}
-\item{\code{\code{\link{H.BAR}}}}
-\item{\code{\code{\link{Vei}}}}
-\item{\code{\code{\link{summary.diallel}}}}
-\item{\code{\code{\link{anova.diallel}}}}
-}}}
-}
 \examples{
 data("diallelMET")
 ModMat <- model.matrixDiallel(Yield ~ Par1 + Par2,

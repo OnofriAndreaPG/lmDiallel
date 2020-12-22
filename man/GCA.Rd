@@ -38,32 +38,12 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\describe{
-\item{\code{\code{\link{model.matrixDiallel}}}}
-\item{\code{\code{\link{lm.diallel}}}}
-\item{\code{\code{\link{RSCA}}}}
-\item{\code{\code{\link{tSCA}}}}
-\item{\code{\code{\link{SCA}}}}
-\item{\code{\code{\link{GCAC}}}}
-\item{\code{\code{\link{RGCA}}}}
-\item{\code{\code{\link{REC}}}}
-\item{\code{\code{\link{SP}}}}
-\item{\code{\code{\link{DD}}}}
-\item{\code{\code{\link{MDD}}}}
-\item{\code{\code{\link{Hi}}}}
-\item{\code{\code{\link{H.BAR}}}}
-\item{\code{\code{\link{Vei}}}}
-\item{\code{\code{\link{summary.diallel}}}}
-\item{\code{\code{\link{anova.diallel}}}}
-\item{\code{\code{\link{matBlock}}}}
-}}
 \examples{
 data("hayman54")
-dMod<-lm(Ftime~ Block + GCA(Par1,Par2)
-         +tSCA(Par1, Par2)+RGCA(Par1, Par2)
+contrasts(hayman54$Block) <- "contr.sum"
+dMod<-lm(Ftime ~ Block + GCA(Par1,Par2)
+         + tSCA(Par1, Par2) + RGCA(Par1, Par2)
          + RSCA(Par1,Par2), data = hayman54)
 anova(dMod)
-
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}
+\keyword{ ~diallel }% use one of  RShowDoc("KEYWORDS")

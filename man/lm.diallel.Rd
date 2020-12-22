@@ -20,9 +20,10 @@ lm.diallel(formula, Block, Env, data, fct)
 \item{fct}{a string variable coding for the selected model. 6 main diallel models: Hayman's model 1 (="HAYMAN1"), Hayman's model 2 (="HAYMAN2"), Griffing's model 1 (="GRIFFING1"), Griffing's model 2 (="GRIFFING2"), Gardner-Eberhart model 2 (="GE2")  and Gardner-Eberhart model 3 (="GE3"). The strings "GE2r" and "GE3r" can be used to specify the 'enhanced' GE2 and GE3 models, including the effect of reciprocals (REC).}
 }
 
+
 \details{
 Notations for the 8 models
-\tabular{lc}{
+\tabular{ll}{
 Model name in 'lm.diallel()' \tab 	Model notation in 'lm()' \cr
 HAYMAN1 	\tab Y ~ GCA(Par1, Par2) + tSCA(Par1, Par2) + RGCA(Par1, Par2) + RSCA(Par1, Par2) \cr
 GRIFFING1	\tab Y ~ GCA(Par1, Par2) + tSCA(Par1, Par2) + REC(Par1, Par2) \cr
@@ -72,27 +73,6 @@ In addition, non-null fits will have components assign, effects and (unless not 
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\describe{
-\item{\code{\code{\link{model.matrixDiallel}}}}
-\item{\code{\code{\link{RSCA}}}}
-\item{\code{\code{\link{tSCA}}}}
-\item{\code{\code{\link{SCA}}}}
-\item{\code{\code{\link{GCA}}}}
-\item{\code{\code{\link{GCAC}}}}
-\item{\code{\code{\link{RGCA}}}}
-\item{\code{\code{\link{REC}}}}
-\item{\code{\code{\link{SP}}}}
-\item{\code{\code{\link{DD}}}}
-\item{\code{\code{\link{MDD}}}}
-\item{\code{\code{\link{Hi}}}}
-\item{\code{\code{\link{H.BAR}}}}
-\item{\code{\code{\link{Vei}}}}
-\item{\code{\code{\link{summary.diallel}}}}
-\item{\code{\code{\link{anova.diallel}}}}
-\item{\code{\code{\link{matBlock}}}}
-}}}
-}
 \examples{
 data(hayman54)
 dMod <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,

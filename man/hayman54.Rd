@@ -35,9 +35,9 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 data(hayman54)
 
 contrasts(hayman54$Block) <- c("contr.sum")
-dMod <- lm(Ftime ~ Block  + + GCA(Par1, Par2)
-             tSCA(Par1, Par2) + RGCA(Par1, Par2) +
-             RSCA(Par1, Par2), data = hayman54)
+dMod <- lm(Ftime ~ Block  + GCA(Par1, Par2)
+             + tSCA(Par1, Par2) + RGCA(Par1, Par2)
+             + RSCA(Par1, Par2), data = hayman54)
 anova(dMod)
 #or
 dMod2 <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,

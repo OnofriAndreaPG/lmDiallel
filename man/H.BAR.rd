@@ -35,28 +35,7 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 %%  ~~further notes~~
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\describe{
-\item{\code{\code{\link{model.matrixDiallel}}}}
-\item{\code{\code{\link{lm.diallel}}}}
-\item{\code{\code{\link{RSCA}}}}
-\item{\code{\code{\link{SCA}}}}
-\item{\code{\code{\link{tSCA}}}}
-\item{\code{\code{\link{GCA}}}}
-\item{\code{\code{\link{GCAC}}}}
-\item{\code{\code{\link{RGCA}}}}
-\item{\code{\code{\link{REC}}}}
-\item{\code{\code{\link{SP}}}}
-\item{\code{\code{\link{DD}}}}
-\item{\code{\code{\link{Hi}}}}
-\item{\code{\code{\link{Vei}}}}
-\item{\code{\code{\link{summary.diallel}}}}
-\item{\code{\code{\link{anova.diallel}}}}
-\item{\code{\code{\link{matBlock}}}}
-}}}
-}
 \examples{
 data("zhang05")
 dMod <- lm(Yield ~ Env/Block + H.BAR(Par1, Par2) + VEi(Par1, Par2) +
@@ -67,5 +46,4 @@ anova(dMod)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ ~diallel }% use one of  RShowDoc("KEYWORDS")

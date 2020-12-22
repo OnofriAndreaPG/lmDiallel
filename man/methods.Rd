@@ -11,6 +11,7 @@
 \usage{
 \method{summary}{diallel}(object, MSA, dfr)
 \method{vcov}{diallel}(object, MSA, dfr)
+}
 \arguments{
   \item{object}{ an object of class \code{\link{diallel}}.}
   \item{MSA}{ Mean Square Error, when it cannot be derived from model fit}
@@ -22,22 +23,22 @@
   by \code{\link{glht}} can be used to actually test the global
   null hypothesis, each of the partial hypotheses and for
   simultaneous confidence intervals for the linear function \eqn{K \theta}.
-  
+
   The \code{\link{coef}} and \code{\link{vcov}} methods compute the linear
   function \eqn{K \hat{\theta}} and its covariance, respectively.
 
   The \code{test} argument to \code{summary} takes a function specifying
   the type of test to be applied. Classical Chisq (Wald test) or F statistics
   for testing the global hypothesis \eqn{H_0} are implemented in functions
-  \code{Chisqtest} and \code{Ftest}. Several approaches to multiplicity adjusted p 
-  values for each of the linear hypotheses are implemented 
+  \code{Chisqtest} and \code{Ftest}. Several approaches to multiplicity adjusted p
+  values for each of the linear hypotheses are implemented
   in function \code{adjusted}. The \code{type}
   argument to \code{adjusted} specifies the method to be applied:
   \code{"single-step"} implements adjusted p values based on the joint
   normal or t distribution of the linear function, and
-  \code{"Shaffer"} and \code{"Westfall"} implement logically constraint 
-  multiplicity adjustments (Shaffer, 1986; Westfall, 1997). 
-  \code{"free"} implements multiple testing procedures under free 
+  \code{"Shaffer"} and \code{"Westfall"} implement logically constraint
+  multiplicity adjustments (Shaffer, 1986; Westfall, 1997).
+  \code{"free"} implements multiple testing procedures under free
   combinations (Westfall et al, 1999).
   In addition, all adjustment methods
   implemented in \code{\link{p.adjust}} are available as well.
@@ -45,13 +46,13 @@
   Simultaneous confidence intervals for linear functions can be computed
   using method \code{\link{confint}}. Univariate confidence intervals
   can be computed by specifying \code{calpha = univariate_calpha()}
-  to \code{confint}. The critical value can directly be specified as a scalar 
+  to \code{confint}. The critical value can directly be specified as a scalar
   to \code{calpha} as well. Note that \code{plot(a)} for some object \code{a} of class
   \code{glht} is equivalent to \code{plot(confint(a))}.
 
   All simultaneous inference procedures implemented here control
   the family-wise error rate (FWER). Multivariate
-  normal and t distributions, the latter one only for models of 
+  normal and t distributions, the latter one only for models of
   class \code{\link{lm}}, are evaluated using the procedures
   implemented in package \code{mvtnorm}. Note that the default
   procedure is stochastic. Reproducible p-values and confidence
@@ -65,9 +66,9 @@
 \value{
 
   \code{summary} computes (adjusted) p values for general linear hypotheses,
-  \code{\link{confint}} computes (adjusted) confidence intervals. 
+  \code{\link{confint}} computes (adjusted) confidence intervals.
   \code{\link{coef}} returns estimates of the linear function \eqn{K \theta}
-  and \code{\link{vcov}} its covariance. 
+  and \code{\link{vcov}} its covariance.
 
 }
 \references{
@@ -75,12 +76,12 @@
    Frank Bretz, Torsten Hothorn and Peter Westfall (2010),
    \emph{Multiple Comparisons Using R}, CRC Press, Boca Raton.
 
-   Juliet P. Shaffer (1986), 
-   Modified sequentially rejective multiple test procedures. 
+   Juliet P. Shaffer (1986),
+   Modified sequentially rejective multiple test procedures.
    \emph{Journal of the American Statistical Association},
    \bold{81}, 826--831.
 
-   Peter H. Westfall (1997), 
+   Peter H. Westfall (1997),
    Multiple testing of general contrasts using logical constraints
    and correlations. \emph{Journal of the American Statistical Association},
    \bold{92}, 299--306.
@@ -97,7 +98,7 @@
 }
 \examples{
 
-  ### set up a two-way ANOVA 
+  ### set up a two-way ANOVA
   amod <- aov(breaks ~ wool + tension, data = warpbreaks)
 
   ### set up all-pair comparisons for factor `tension'
@@ -114,8 +115,8 @@
 
   ### all means for levels of `tension'
   amod <- aov(breaks ~ tension, data = warpbreaks)
-  glht(amod, linfct = matrix(c(1, 0, 0, 
-                               1, 1, 0, 
+  glht(amod, linfct = matrix(c(1, 0, 0,
+                               1, 1, 0,
                                1, 0, 1), byrow = TRUE, ncol = 3))
 
   ### confidence bands for a simple linear model, `cars' data
@@ -127,11 +128,11 @@
   abline(lmod)
 
   ### a grid of speeds
-  speeds <- seq(from = min(cars$speed), to = max(cars$speed), 
+  speeds <- seq(from = min(cars$speed), to = max(cars$speed),
                 length = 10)
 
   ### linear hypotheses: 10 selected points on the regression line != 0
-  K <- cbind(1, speeds)                                                        
+  K <- cbind(1, speeds)
 
   ### set up linear hypotheses
   cht <- glht(lmod, linfct = K)

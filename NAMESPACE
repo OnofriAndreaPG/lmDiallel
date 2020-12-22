@@ -1,10 +1,11 @@
 exportPattern("^[[:alpha:]]+")
-importFrom("plyr", "ldply")
-import(multcomp)
+importFrom("plyr", "dlply")
+import("multcomp")
 importFrom("stats", ".getXlevels", "coef", "coefficients",
                 "contrasts<-", "deviance", "df", "df.residual", "dnorm",
                 "formula", "lm", "lm.fit", "model.extract", "model.matrix",
                 "model.response", "optim", "pf", "pt")
+importFrom("stats", "anova", "fitted", "vcov", "window")
      importFrom("utils", "combn")
 export(model.matrixDiallel, lm.diallel, matBlock,
        model.matrix.diallel, vcov.diallel, summary.diallel,
