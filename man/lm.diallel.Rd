@@ -74,15 +74,25 @@ In addition, non-null fits will have components assign, effects and (unless not 
 
 \seealso{
 \describe{
-\item{\code{\code{\link{model.matrix}}}}
-\item{\code{\code{\link{GCA}}}}
+\item{\code{\code{\link{model.matrixDiallel}}}}
+\item{\code{\code{\link{RSCA}}}}
+\item{\code{\code{\link{tSCA}}}}
 \item{\code{\code{\link{SCA}}}}
+\item{\code{\code{\link{GCA}}}}
+\item{\code{\code{\link{GCAC}}}}
+\item{\code{\code{\link{RGCA}}}}
+\item{\code{\code{\link{REC}}}}
+\item{\code{\code{\link{SP}}}}
+\item{\code{\code{\link{DD}}}}
+\item{\code{\code{\link{MDD}}}}
 \item{\code{\code{\link{Hi}}}}
 \item{\code{\code{\link{H.BAR}}}}
 \item{\code{\code{\link{Vei}}}}
 \item{\code{\code{\link{summary.diallel}}}}
 \item{\code{\code{\link{anova.diallel}}}}
-}}
+\item{\code{\code{\link{matBlock}}}}
+}}}
+}
 \examples{
 data(hayman54)
 dMod <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,
