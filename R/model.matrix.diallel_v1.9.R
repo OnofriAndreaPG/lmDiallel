@@ -198,7 +198,7 @@ if(is.null(Env) == T){
 
       # GRIFFING 14 - No reciprocals, no selfs #########
       Z <- GCA(P1, P2)
-      SCA <- SCA(P1, P2)
+      SCA <- SCA.G3(P1, P2)
       X <- cbind(X, Z, SCA)
       groups <- c(groups, seq(nGroups+1, nGroups+2, 1))
       reps <- c(reps, length(Z[1,]),
