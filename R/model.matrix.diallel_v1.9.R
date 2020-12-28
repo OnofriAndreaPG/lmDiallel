@@ -124,7 +124,7 @@ if(is.null(Env) == T){
                               ,length(rec[1,]))
       levs <- rep(groups, reps)
       attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "Mean Dom. Dev.", "GCA", "Dom. Dev.", "SCA",
+      namEffs <- c(namEffs, "MDD", "GCA", "DD", "SCA",
                    "RGCA", "RSCA", "Residuals")
       attr(X, "namEff") <- namEffs
 
