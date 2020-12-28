@@ -10,8 +10,8 @@ importFrom("stats", "anova", "fitted", "vcov", "window")
 export(model.matrixDiallel, lm.diallel, matBlock,
        model.matrix.diallel, vcov.diallel, summary.diallel,
        anova.diallel, glht.diallelMod, diallel.eff,
-       GCA, VEi, SP, RGCA, tSCA, SCA.GE, RSCA,
-       REC, H.BAR, MDD, Hi, GCAC, DD)
+       GCA, VEi, SP, RGCA, tSCA, SCA, SCA.G3, SCA.GE, RSCA,
+       REC, REC.G3, H.BAR, MDD, Hi, GCAC, DD)
 
 ## S3 methods
 S3method(summary, diallel)

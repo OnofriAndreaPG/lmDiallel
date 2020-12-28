@@ -767,6 +767,100 @@ SCA <- function(P1, P2, data = NULL){
      SCA
 }
 
+SCA.G3 <- function(P1, P2, data = NULL){
+  # SCA effect in absence of selfed parents (only crosses)
+  # and reciprocals
+  if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
+  # Matrix for SCA in heterosis model Hayman2
+  # P1 <- df$Par1; P2 <- df$Par2
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+  P1c <- as.character(P1); P2c <- as.character(P2)
+  combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+  combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
+  mating <- factor(P1n*10 + P2n)
+  p <- length(levels(factor(c(levels(P1), levels(P2)) )))
+  n <- length(combination)
+  last <- seq(10, (p-1)*10, 10) + p
+  levs <- as.numeric(levels(combination))
+  idx1 <- c()
+  for(i in 1:length(last)){ #Indica l'ultimo
+    y <- which(levs == last[i])
+    idx1[i] <- y
+  }
+  idx2 <- c()
+  for(i in 1:length(last)){ #Indica il penultimo
+    y <- which(levs == (last[i] - 1))
+    if(length(y) > 0) idx2[i] <- y
+  }
+  selflist <- as.numeric(levels(factor(combination[P1n == P2n])))
+  idx3 <- c()
+  for(i in 1:length(selflist)){ #Indica il penultimo
+    #i <- 2
+    y <- which(levs == selflist[i])
+    if(length(y) > 0) idx3[i] <- y
+  }
+
+  idx <- c(idx1, idx3)
+  rimossi <- levs[idx]
+  levs <- as.character(levs[-idx])
+  rimossi <- c(rimossi, levs[length(levs)])
+  levs <- levs[-length(levs)]
+  SCA <- matrix(0, nrow = n, ncol = length(levs))
+  colnames(SCA) <- paste(levs)
+  #colnames(SCA)
+  colNamsOrd <- levels(combLev)[-idx][-length(levels(combLev)[-idx])]
+
+  # Step 2. Insert 1s for all the levels, which are
+  # in the SCA matrix
+  for(i in 1:length(levs)){
+    cond <- (combination == colnames(SCA)[i])*1
+    SCA[, i] <- cond
+  }
+  # Step 3. Insert the -1s for the last level. The last level of
+  # Par2, within each level of Par1. The last level of Par1
+  # requires another step
+  for(i in 1:(length(last) - 1)){
+    start <- ceiling(ifelse(i == 1, 1, last[i-1])/10) * 10 +1
+    arrival <- last[i]
+    sel <- seq(start, arrival, 1)
+    tmp <- as.character( sel[1:i] ) # Se necessario, inverte i reciproci
+    splits <- strsplit(tmp, "")
+    reversed <- lapply(splits, rev)
+    tmp <- as.character(lapply(reversed, paste, collapse = ""))
+    sel[1:i] <- as.numeric(tmp)
+    #sel
+    idx <- c() # Identifica la posizione di quelli da scrivere
+    for(j in 1:length(sel)){
+      #i <- 7
+      y <- which(levs == sel[j])
+      if(length(y) > 0) idx[j] <- y
+    }
+    idx
+    SCA[,idx]
+    idx1 <- last[i]
+    SCA[combination == idx1, idx] <- -1
+  }
+  # SCA
+  # Mancano le combinazioni degli ultimi 3 ibridi
+  # 67, 68, 76, 78, 86, 87
+  tmp <- seq(p-2, p, 1)
+  tmp <- as.data.frame(combn(tmp, 2))
+  tmp <- apply(tmp, 2, function(x) paste(x[1], x[2], sep = ""))
+  SCA[combination == tmp[1], ] <- -1
+  SCA[combination == tmp[2], ] <- SCA[combination == tmp[2], ] + 1
+  SCA[combination == tmp[3], ] <- SCA[combination == tmp[3], ] + 1
+  #colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
+  colnames(SCA) <- paste("s_", colNamsOrd, sep = "")
+  SCA
+}
+
 SCA.GE <- function(P1, P2, data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
@@ -998,6 +1092,57 @@ REC <- function(P1, P2, data = NULL){
   colnames(rec) <- paste("r_", colNamsOrd, sep = "")
   rec
 }
+
+REC.G3 <- function(P1, P2, data = NULL){
+  # Reciprocal effects for designs with
+  # no selfed parents
+  if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
+  # P1 <- df$Par1; P2 <- df$Par2
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  n <- length(P1)
+  p <- length(levels(P1))
+  P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+  P1c <- as.character(P1); P2c <- as.character(P2)
+  mate <- factor(P1n*10 + P2n)
+  combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+  dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
+  combLev <- factor( paste(P1c, P2c, sep = ":") )
+
+  last <- c(); cont <- 1
+  for(i in 1:p){ for(j in 1:i) {
+    if(i != j) {
+      last[cont] <- paste(i, j, sep="")
+      cont = cont + 1 } } }
+  last
+  last <- as.numeric(last)
+  levs <- as.numeric(levels(mate))
+  idx <- c()
+  for(i in 1:length(last)){
+    y <- which(levs == last[i])
+    if(length(y) > 0) idx[i] <- y
+  }
+  levs <- as.character(levs[-idx])
+  # levs
+  rec <- matrix(0, nrow = n, ncol = length(levs))
+  colnames(rec) <- paste(levs)
+  colNamsOrd <- levels(combLev)[-idx]
+
+  for(i in 1:length(levs)){
+    cond <- (combination == colnames(rec)[i] ) * 1
+    rec[, i] <- cond
+  }
+  rec <- rec*dr
+  # colnames(rec) <- paste("r_", colnames(rec), sep = "")
+  colnames(rec) <- paste("r_", colNamsOrd, sep = "")
+  rec
+}
+
 
 H.BAR <- function(P1, P2, data = NULL){
     if(!is.null(data)){
