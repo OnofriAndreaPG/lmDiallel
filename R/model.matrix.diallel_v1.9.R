@@ -156,7 +156,7 @@ if(is.null(Env) == T){
       attr(X, "namEff") <- namEffs
 
     } else if(fct == "GRIFFING2"){
-      # GRIFFING 2 - No reciprocals #########################################
+      # GRIFFING 2 - No reciprocals #######################
       # 23/03/2020
 
       #B <- matBlock(~Block)
@@ -176,6 +176,37 @@ if(is.null(Env) == T){
       attr(X, "assign") <- levs
       namEffs <- c(namEffs, "GCA", "SCA",
                                  "Residuals")
+      attr(X, "namEff") <- namEffs
+    } else if(fct == "GRIFFING3"){
+
+      # GRIFFING 3 - Reciprocal effects, no selfs ###################
+      Z <- GCA(P1, P2)
+      SCA <- SCA.G3(P1, P2)
+      rec <- REC.G3(P1, P2)
+      X <- cbind(X, Z, SCA, rec)
+      groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
+      reps <- c(reps, length(Z[1,]),
+                length(SCA[1,])
+                , length(rec[1,]))
+      levs <- rep(groups, reps)
+      attr(X, "assign") <- levs
+      namEffs <- c(namEffs, "GCA", "SCA", "Reciprocals",
+                   "Residuals")
+      attr(X, "namEff") <- namEffs
+
+    } else if(fct == "GRIFFING4"){
+
+      # GRIFFING 14 - No reciprocals, no selfs #########
+      Z <- GCA(P1, P2)
+      SCA <- SCA(P1, P2)
+      X <- cbind(X, Z, SCA)
+      groups <- c(groups, seq(nGroups+1, nGroups+2, 1))
+      reps <- c(reps, length(Z[1,]),
+                length(SCA[1,]))
+      levs <- rep(groups, reps)
+      attr(X, "assign") <- levs
+      namEffs <- c(namEffs, "GCA", "SCA",
+                   "Residuals")
       attr(X, "namEff") <- namEffs
 
     } else if(fct == "GE2"){
