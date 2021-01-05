@@ -74,19 +74,20 @@ In addition, non-null fits will have components assign, effects and (unless not 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-data(hayman54)
+data("hayman54")
 dMod <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,
                   data = hayman54,
                   fct = "HAYMAN1")
 anova(dMod)
 
 #or
-data(zhang05)
+data("zhang05")
 contrasts(zhang05$Block) <- c("contr.sum")
 dMod2 <- lm.diallel(Yield ~ Par1 + Par2, Env = Env, Block = Block,
             data = zhang05, fct = "GE2")
 
 #or
+data("lonnquist61")
 dMod3 <- lm.diallel(Yield ~ Par1 + Par2,
                   data = lonnquist61,
                   fct = "GE2")

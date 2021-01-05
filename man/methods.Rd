@@ -6,11 +6,12 @@
 \alias{glht.diallel}
 \title{ Methods for diallel model fitting }
 \description{
-  Description
+  The object returned by the 'lm.diallel()' function is of classes 'lm' and 'diallel'. Specific methods were devised to explore the 'diallel' object.
 }
 \usage{
 \method{summary}{diallel}(object, MSA, dfr)
 \method{vcov}{diallel}(object, MSA, dfr)
+\method{anova}{diallel}(object, MSA, dfr)
 }
 \arguments{
   \item{object}{ an object of class \code{\link{diallel}}.}
@@ -18,49 +19,6 @@
   \item{dfr}{ Residual degrees of freedom, when they cannot be derived from model fit}
 }
 \details{
-
-  The methods for general linear hypotheses as described by objects returned
-  by \code{\link{glht}} can be used to actually test the global
-  null hypothesis, each of the partial hypotheses and for
-  simultaneous confidence intervals for the linear function \eqn{K \theta}.
-
-  The \code{\link{coef}} and \code{\link{vcov}} methods compute the linear
-  function \eqn{K \hat{\theta}} and its covariance, respectively.
-
-  The \code{test} argument to \code{summary} takes a function specifying
-  the type of test to be applied. Classical Chisq (Wald test) or F statistics
-  for testing the global hypothesis \eqn{H_0} are implemented in functions
-  \code{Chisqtest} and \code{Ftest}. Several approaches to multiplicity adjusted p
-  values for each of the linear hypotheses are implemented
-  in function \code{adjusted}. The \code{type}
-  argument to \code{adjusted} specifies the method to be applied:
-  \code{"single-step"} implements adjusted p values based on the joint
-  normal or t distribution of the linear function, and
-  \code{"Shaffer"} and \code{"Westfall"} implement logically constraint
-  multiplicity adjustments (Shaffer, 1986; Westfall, 1997).
-  \code{"free"} implements multiple testing procedures under free
-  combinations (Westfall et al, 1999).
-  In addition, all adjustment methods
-  implemented in \code{\link{p.adjust}} are available as well.
-
-  Simultaneous confidence intervals for linear functions can be computed
-  using method \code{\link{confint}}. Univariate confidence intervals
-  can be computed by specifying \code{calpha = univariate_calpha()}
-  to \code{confint}. The critical value can directly be specified as a scalar
-  to \code{calpha} as well. Note that \code{plot(a)} for some object \code{a} of class
-  \code{glht} is equivalent to \code{plot(confint(a))}.
-
-  All simultaneous inference procedures implemented here control
-  the family-wise error rate (FWER). Multivariate
-  normal and t distributions, the latter one only for models of
-  class \code{\link{lm}}, are evaluated using the procedures
-  implemented in package \code{mvtnorm}. Note that the default
-  procedure is stochastic. Reproducible p-values and confidence
-  intervals require appropriate settings of seeds.
-
-  A more detailed description of the underlying methodology is
-  available from Hothorn et al. (2008) and Bretz et al. (2010).
-
 
 }
 \value{
@@ -73,87 +31,10 @@
 }
 \references{
 
-   Frank Bretz, Torsten Hothorn and Peter Westfall (2010),
-   \emph{Multiple Comparisons Using R}, CRC Press, Boca Raton.
-
-   Juliet P. Shaffer (1986),
-   Modified sequentially rejective multiple test procedures.
-   \emph{Journal of the American Statistical Association},
-   \bold{81}, 826--831.
-
-   Peter H. Westfall (1997),
-   Multiple testing of general contrasts using logical constraints
-   and correlations. \emph{Journal of the American Statistical Association},
-   \bold{92}, 299--306.
-
-   P. H. Westfall, R. D. Tobias, D. Rom, R. D. Wolfinger, Y. Hochberg (1999).
-   \emph{Multiple Comparisons and Multiple Tests Using the SAS System}.
-   Cary, NC: SAS Institute Inc.
-
-   Torsten Hothorn, Frank Bretz and Peter Westfall (2008),
-   Simultaneous Inference in General Parametric Models.
-   \emph{Biometrical Journal}, \bold{50}(3), 346--363;
-   See \code{vignette("generalsiminf", package = "multcomp")}.
 
 }
 \examples{
 
-  ### set up a two-way ANOVA
-  amod <- aov(breaks ~ wool + tension, data = warpbreaks)
-
-  ### set up all-pair comparisons for factor `tension'
-  wht <- glht(amod, linfct = mcp(tension = "Tukey"))
-
-  ### 95\% simultaneous confidence intervals
-  plot(print(confint(wht)))
-
-  ### the same (for balanced designs only)
-  TukeyHSD(amod, "tension")
-
-  ### corresponding adjusted p values
-  summary(wht)
-
-  ### all means for levels of `tension'
-  amod <- aov(breaks ~ tension, data = warpbreaks)
-  glht(amod, linfct = matrix(c(1, 0, 0,
-                               1, 1, 0,
-                               1, 0, 1), byrow = TRUE, ncol = 3))
-
-  ### confidence bands for a simple linear model, `cars' data
-  plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)",
-       las = 1)
-
-  ### fit linear model and add regression line to plot
-  lmod <- lm(dist ~ speed, data = cars)
-  abline(lmod)
-
-  ### a grid of speeds
-  speeds <- seq(from = min(cars$speed), to = max(cars$speed),
-                length = 10)
-
-  ### linear hypotheses: 10 selected points on the regression line != 0
-  K <- cbind(1, speeds)
-
-  ### set up linear hypotheses
-  cht <- glht(lmod, linfct = K)
-
-  ### confidence intervals, i.e., confidence bands, and add them plot
-  cci <- confint(cht)
-  lines(speeds, cci$confint[,"lwr"], col = "blue")
-  lines(speeds, cci$confint[,"upr"], col = "blue")
-
-
-  ### simultaneous p values for parameters in a Cox model
-  if (require("survival") && require("MASS")) {
-      data("leuk", package = "MASS")
-      leuk.cox <- coxph(Surv(time) ~ ag + log(wbc), data = leuk)
-
-      ### set up linear hypotheses
-      lht <- glht(leuk.cox, linfct = diag(length(coef(leuk.cox))))
-
-      ### adjusted p values
-      print(summary(lht))
   }
 
-}
-\keyword{htest}
+\keyword{diallel}

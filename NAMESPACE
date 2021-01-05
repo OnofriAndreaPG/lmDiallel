@@ -1,5 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 importFrom("plyr", "dlply")
+importFrom("sommer", "mmer", "overlay")
 import("multcomp")
 importFrom("stats", ".getXlevels", "coef", "coefficients",
                 "contrasts<-", "deviance", "df", "df.residual", "dnorm",
@@ -7,7 +8,7 @@ importFrom("stats", ".getXlevels", "coef", "coefficients",
                 "model.response", "optim", "pf", "pt")
 importFrom("stats", "anova", "fitted", "vcov", "window")
      importFrom("utils", "combn")
-export(model.matrixDiallel, lm.diallel, matBlock,
+export(model.matrixDiallel, lm.diallel, mmer.diallel, matBlock,
        model.matrix.diallel, vcov.diallel, summary.diallel,
        anova.diallel, glht.diallelMod, diallel.eff,
        GCA, VEi, SP, RGCA, tSCA, SCA, SCA.G3, SCA.GE, RSCA,

@@ -8,12 +8,12 @@ Dominant Deviation effect
 DD effect to fit Hayman2 model with \code{lm} function
 }
 \usage{
-DD(x, y, data)
+DD(P1, P2, data)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{\code{a variable for the first parent}}
-  \item{y}{\code{a variable for the second parent}}
+  \item{P1}{\code{a variable for the first parent}}
+  \item{P2}{\code{a variable for the second parent}}
   \item{data}{\code{a 'data.frame' where to look for explanatory variables}}
 }
 \details{
