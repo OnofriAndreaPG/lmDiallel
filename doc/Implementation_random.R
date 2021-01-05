@@ -91,6 +91,10 @@ mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
                       data = df, fct = "GRIFFING1")
 mod1m
 
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GRIFFING1")
+mod1m
+
 # GRIFFING MODEL 2 ##############################
 # GCA + tSCA, no Reciprocals
 # mod1r <- asreml(Ftime ~ 1, data=df,
@@ -111,6 +115,10 @@ mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
                       data = dfNoRec, fct = "GRIFFING2")
 mod1m
 
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = dfNoRec, fct = "GRIFFING2")
+mod1m
+
 # GRIFFING MODEL 3 ##############################
 # GCA + tSCA + Rec, selfs
 dfNoSel <- df %>%
@@ -127,7 +135,11 @@ mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
                       data = dfNoSel, fct = "GRIFFING3")
 mod1m
 
-# GRIFFING MODEL 3 ##############################
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = dfNoSel, fct = "GRIFFING3")
+mod1m
+
+# GRIFFING MODEL 4 ##############################
 # GCA + SCA no Rec no selfs
 dfNone <- df %>%
   filter(as.character(Par1) != as.character(Par2)) %>% # removing selfs
@@ -140,67 +152,120 @@ mod1h <- mmer(Ftime ~ 1, data = dfNone,
 summary(mod1h)$varcomp
 
 mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
-                      data = dfNoSel, fct = "GRIFFING4")
+                      data = dfNone, fct = "GRIFFING4")
+mod1m
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = dfNone, fct = "GRIFFING4")
 mod1m
 
 
-# GE2 ###########################################
-# no reciprocals
-mod1r <- asreml(Ftime ~ Block + crosses, data=df,
-                random = ~ Par1 + and(Par2) # GCA
-                + Par1:crosses + and(Par2:crosses)  #h.i
-                + combination:crosses) # SCA
-summary(mod1r)$varcomp
+# GE2r ###########################################
+# with reciprocals
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1 + and(Par2) # GCA
+#                 + Par1:crosses + and(Par2:crosses)  #h.i
+#                 + combination:crosses) # SCA
+# summary(mod1r)$varcomp
 
-mod1h <- mmer(Ftime ~ Block + crosses, data=df,
-              random = ~ overlay(Par1, Par2) # GCA
+mod1h <- mmer(Ftime ~ crosses, data=df,
+              random = ~ Block + overlay(Par1, Par2) # GCA
               + overlay(Par1, Par2):crosses  #h.i
-              + combination:crosses) # SCA
+              + combination:crosses # SCA
+              + combination:crosses:dr)
 summary(mod1h)$varcomp
 
-mod1m <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,
-                      data = dfNone, fct = "GRIFFING4")
-anova(mod1m)
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
+                      data = df, fct = "GE2r")
+mod1m
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
+                      data = df, fct = "GE2r")
+mod1m
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE2r")
+mod1m
+
+# GE2 ###########################################
+# without reciprocals
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1 + and(Par2) # GCA
+#                 + Par1:crosses + and(Par2:crosses)  #h.i
+#                 + combination:crosses) # SCA
+# summary(mod1r)$varcomp
+
+mod1h <- mmer(Ftime ~ crosses, data=df,
+              random = ~ Block + overlay(Par1, Par2) # GCA
+              + overlay(Par1, Par2):crosses  #h.i
+              + combination:crosses)
+summary(mod1h)$varcomp
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
+                      data = df, fct = "GE2")
+mod1m
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE2")
+mod1m
+
+# GE3r ################################
+# with reciprocals. In Mohring: mixed, model 3 reduced
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
+#                 + Par1:selfs # Selfed parents
+#                 + combination:crosses # SCA solo crosses
+#                 + combination:dr) # reciprocals
+# summary(mod1r)$varcomp
+mod1h <- mmer(Ftime ~ crosses, data=df,
+                random = ~ Block + overlay(Par1, Par2):crosses #GCA, only crosses
+                + Par1:selfs # Selfed parents
+                + combination:crosses # SCA solo crosses
+                + combination:dr) # reciprocals
+summary(mod1h)$varcomp
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
+                      data = df, fct = "GE3r")
+mod1m
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE3r")
+mod1m
+
 
 # GE3 ############################################
-mod1r <- asreml(Ftime ~ Block + crosses, data=df,
-                random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
-                + Par1:selfs # Selfed parents
-                + combination:crosses) # SCA solo crosses
-summary(mod1r)$varcomp
+# no reciprocals
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
+#                 + Par1:selfs # Selfed parents
+#                 + combination:crosses) # SCA solo crosses
+# summary(mod1r)$varcomp
 
-mod1h <- mmer(Ftime ~ Block + crosses, data=df,
-              random = ~ overlay(Par1, Par2):crosses #GCA solo crosses
+mod1h <- mmer(Ftime ~ crosses, data=df,
+              random = ~ Block + overlay(Par1, Par2):crosses #GCA solo crosses
               + Par1:selfs # Selfed parents
               + combination:crosses) # SCA solo crosses
 summary(mod1h)$varcomp
 
-# GE3 with reciprocals ################################
-# In Mohring: mixed, model 3 reduced
-mod1r <- asreml(Ftime ~ Block + crosses, data=df,
-                random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
-                + Par1:selfs # Selfed parents
-                + combination:crosses # SCA solo crosses
-                + combination:dr) # reciprocals
-summary(mod1r)$varcomp
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,
+                      data = df, fct = "GE3")
+mod1m
 
-mod1h <- mmer(Ftime ~ Block + crosses, data=df,
-                random = ~ overlay(Par1, Par2):crosses #GCA, only crosses
-                + Par1:selfs # Selfed parents
-                + combination:crosses # SCA solo crosses
-                + combination:dr) # reciprocals
-summary(mod1r)$varcomp
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE3")
+mod1m
 
 # GE3 with RGCA + RSCA ##########################
 #In Mohring: mixed, model 3 completo
-mod1r <- asreml(Ftime ~ Block + crosses, data=df,
-                random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
-                + Par1:selfs # Selfed parents
-                + combination:crosses # SCA solo crosses
-                + Par1:dr + and(Par2:dr) # RGCA: exclude selfs
-                + combination:dr) #RSCA: exclude selfs
-summary(mod1r)$varcomp
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
+#                 + Par1:selfs # Selfed parents
+#                 + combination:crosses # SCA solo crosses
+#                 + Par1:dr + and(Par2:dr) # RGCA: exclude selfs
+#                 + combination:dr) #RSCA: exclude selfs
+# summary(mod1r)$varcomp
 
+# Not included in lmDiallel
 mod1h <- mmer(Ftime ~ Block + crosses, data=df,
               random = ~ overlay(Par1, Par2):crosses #GCA solo crosses
               + Par1:selfs # Selfed parents
@@ -219,6 +284,7 @@ library(lmDiallel)
 library(tidyverse)
 
 data("hayman54")
+
 df <- hayman54 %>%  # Working with means
   group_by(Par1, Par2) %>%
   summarise(Ftime = mean(Ftime))
@@ -277,128 +343,204 @@ mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, data = df,
 mod1m
 
 # GRIFFING MODEL1 #######################
-# GCA + SCA no reciprocals. SCA dovrebbe essere residuo
-# Ma se lo lascio come tale non OK
-mod1 <- asreml(Ftime ~ crosses, data = df,
-               random = ~ Par1 + and(Par2) # GCA
-               + combination) #SCA. Reciprocals è residuo + pure error
-summary(mod1)$varcomp
+# GCA + SCA + Reciprocals (come residuo)
+# mod1 <- asreml(Ftime ~ crosses, data = df,
+#                random = ~ Par1 + and(Par2) # GCA
+#                + combination) #SCA. Reciprocals è residuo + pure error
+# summary(mod1)$varcomp
 
-modh <- mmer(Ftime ~ crosses,
-             random = ~overlay(Par1, Par2)
+modh <- mmer(Ftime ~ 1,
+             random = ~ overlay(Par1, Par2)
              + combination,
              data=df)
 summary(modh)$varcomp #Sembra più stabile
 
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, data = df,
+                      fct = "GRIFFING1")
+mod1m
+
 # GRIFFING MODEL 2 ##########################
-# GCA + SCA + reciprocals (come residuo = sopra)
+# No reciprocals
+dfNoRec <- df %>%
+  filter(as.character(Par1) <= as.character(Par2)) #Removing reciprocals
+
+modh <- mmer(Ftime ~ 1,
+             random = ~ overlay(Par1, Par2),
+             data=dfNoRec)
+summary(modh)$varcomp #Sembra più stabile
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, data = dfNoRec,
+                      fct = "GRIFFING2")
+mod1m
+
+# GRIFFING MODEL 3 ##########################
+# No selfs
+dfNoSel <- df %>%
+  filter(as.character(Par1) != as.character(Par2)) # removing selfs
+
+modh <- mmer(Ftime ~ 1,
+             random = ~ overlay(Par1, Par2) +
+               combination,
+             data=dfNoSel)
+summary(modh)$varcomp #Sembra più stabile
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, data = dfNoSel,
+                      fct = "GRIFFING3")
+mod1m
+
+# GRIFFING MODEL 4 ##########################
+# No selfs
+dfNone <- df %>%
+  filter(as.character(Par1) != as.character(Par2)) %>% # removing selfs
+  filter(as.character(Par1) <= as.character(Par2))
+
+modh <- mmer(Ftime ~ 1,
+             random = ~ overlay(Par1, Par2),
+             data=dfNone)
+summary(modh)$varcomp #Sembra più stabile
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2, data = dfNone,
+                      fct = "GRIFFING4")
+mod1m
+
+# GE2r ###########################################
+# with reciprocals
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1 + and(Par2) # GCA
+#                 + Par1:crosses + and(Par2:crosses)  #h.i
+#                 + combination:crosses) # SCA
+# summary(mod1r)$varcomp
+
+mod1h <- mmer(Ftime ~ crosses, data=df,
+              random = ~ overlay(Par1, Par2) # GCA
+              + overlay(Par1, Par2):crosses  #h.i
+              + combination:crosses)
+summary(mod1h)$varcomp
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE2r")
+mod1m
+
+# GE2 ###########################################
+# without reciprocals
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1 + and(Par2) # GCA
+#                 + Par1:crosses + and(Par2:crosses)  #h.i
+#                 + combination:crosses) # SCA
+# summary(mod1r)$varcomp
+
+mod1h <- mmer(Ftime ~ crosses, data=df,
+              random = ~ overlay(Par1, Par2) # GCA
+              + overlay(Par1, Par2):crosses)
+summary(mod1h)$varcomp
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE2")
+mod1m
 
 
-# GE2 ########################################
-# GCA + SCA (scomposta) - no reciproci
-# Considera diverse medie selfed and crosses
-modr <- asreml(Yield ~ crosses, data = df,
-               random = ~ Par1 + and(Par2) #GCA
-               + Par1:crosses + and(Par2:crosses) #h.i
-               + combination:crosses) #SCA, data=df)
-summary(modr)$varcomp
+# GE3r ################################
+# with reciprocals. In Mohring: mixed, model 3 reduced
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
+#                 + Par1:selfs # Selfed parents
+#                 + combination:crosses # SCA solo crosses
+#                 + combination:dr) # reciprocals
+# summary(mod1r)$varcomp
+mod1h <- mmer(Ftime ~ crosses, data=df,
+                random = ~ overlay(Par1, Par2):crosses #GCA, only crosses
+                + Par1:selfs # Selfed parents
+                + combination:crosses) # reciprocals
+summary(mod1h)$varcomp
 
-modh <- mmer(Yield ~ crosses, data = df,
-               random = ~ overlay(Par1, Par2) #GCA
-               + overlay(Par1, Par2):crosses #h.i
-               + combination:crosses) #SCA, data=df)
-summary(modh)$varcomp
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE3r")
+mod1m
 
 # GE3 ############################################
-# GCA + SCA scomposta (senza hi) + selfed parents
-modr <- asreml(Ftime ~ crosses, data=df,
-                random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
-                + Par1:selfs # Selfed parents
-                + combination:crosses) # SCA solo crosses
-summary(modr)$varcomp
+# no reciprocals
+# mod1r <- asreml(Ftime ~ Block + crosses, data=df,
+#                 random = ~ Par1:crosses + and(Par2:crosses) #GCA solo crosses
+#                 + Par1:selfs # Selfed parents
+#                 + combination:crosses) # SCA solo crosses
+# summary(mod1r)$varcomp
 
-modh <- mmer(Ftime ~ crosses, data=df,
-               random = ~ overlay(Par1, Par2):crosses #GCA solo crosses
-               + Par1:selfs # Selfed parents
-               + combination:crosses) # SCA solo crosses
-summary(modh)$varcomp
+mod1h <- mmer(Ftime ~ crosses, data=df,
+              random = ~ overlay(Par1, Par2):crosses #GCA solo crosses
+              + Par1:selfs) # SCA solo crosses
+summary(mod1h)$varcomp
+
+mod1m <- mmer.diallel(Ftime ~ Par1 + Par2,
+                      data = df, fct = "GE3")
+mod1m
 
 # Example 2 Lonnquist #####################
 # Reproducing the results in Mohring, 2011
 # Method = 2
 rm(list=ls())
-library(agridat)
-data(lonnquist.maize)
-dat <- lonnquist.maize
-dat <- transform(dat,
-                 p1=factor(p1,
-                   levels=c("C","L","M","H","G","P","B","RM","N","K","R2","K2")),
-                 p2=factor(p2,
-                   levels=c("C","L","M","H","G","P","B","RM","N","K","R2","K2")))
-d2 <- subset(dat, is.element(p1, c("M","H","G","B","K","K2")) &
-                      is.element(p2, c("M","H","G","B","K","K2")))
-d2 <- droplevels(d2)
-df <- d2
-names(df) <- c("Par1", "Par2", "Yield")
-
+library(lmDiallel)
+data(lonnquist61)
+df <- lonnquist61
 
 # Dummy variables for selfs, crosses, combinations
 df$crosses <- ifelse(df$Par1 == df$Par2, 0, 1)
 df$selfs <- ifelse(df$Par1 == df$Par2, 1, 0)
 df$dr <- ifelse(as.character(df$Par1) < as.character(df$Par2), -1,
                 ifelse(as.character(df$Par1) == as.character(df$Par2), 0, 1))
-# Ignore reciprocals
 df$combination <- factor( ifelse(as.character(df$Par1) <= as.character(df$Par2),
                                  paste(df$Par1, df$Par2, sep =""),
                                  paste(df$Par2, df$Par1, sep ="")) )
 
-# Hayman's model cannot be used, as they contain the
-# reciprocal effects
 
-# Griffing - Method 2 ###############################
+# Griffing MODEL 2 ###############################
 # Solo GCA e SCAt - no reciproci
-mod1r <- asreml(Yield ~ 1, data=df,
-               random = ~ Par1 + and(Par2))
-summary(mod1r)$varcomp
+# mod1r <- asreml(Yield ~ 1, data=df,
+#                random = ~ Par1 + and(Par2))
+# summary(mod1r)$varcomp
 
 mod1h <- mmer(Yield ~ 1, data=df,
                 random = ~ overlay(Par1, Par2))
 summary(mod1h)$varcomp
 
+mod1m <- mmer.diallel(Yield ~ Par1 + Par2,
+                      data = df, fct = "GRIFFING2")
+mod1m
+
 # GE 2 ###########################################
-# La SCA viene decomposta e le medie sono diverse
-# per selfed e crossed
-modr <- asreml(Yield ~ crosses, data = df,
-               random = ~ Par1 + and(Par2) #GCA
-               + Par1:crosses + and(Par2:crosses) ) #h.i
-summary(modr)$varcomp
+# modr <- asreml(Yield ~ crosses, data = df,
+#                random = ~ Par1 + and(Par2) #GCA
+#                + Par1:crosses + and(Par2:crosses) ) #h.i
+# summary(modr)$varcomp
 
 modh <- mmer(Yield ~ crosses, data = df,
                random = ~ overlay(Par1, Par2) #GCA
                + overlay(Par1, Par2):crosses) #h.i
-
 summary(modh)$varcomp
+
+mod1m <- mmer.diallel(Yield ~ Par1 + Par2,
+                      data = df, fct = "GE2")
+mod1m
 
 
 # GE3 ###############################################
 # GCA + SCA scomposta (senza hi) + selfed parents
-mod3r <- asreml(Yield ~ crosses,
-                random = ~ Par1:crosses + and(Par2:crosses)
-                + Par1:selfs,
-               data=df)
-summary(mod3r)$varcomp
+# mod3r <- asreml(Yield ~ crosses,
+#                 random = ~ Par1:crosses + and(Par2:crosses)
+#                 + Par1:selfs,
+#                data=df)
+# summary(mod3r)$varcomp
+
+mod1m <- mmer.diallel(Yield ~ Par1 + Par2,
+                      data = df, fct = "GE3")
+mod1m
 
 
 # Example of mating method 4 ###########################
 # Balanced design ######################################
 rm(list =ls())
-df <- read.csv("Griffing.csv", header = T)
-head(df, 10)
-df$Par1 <- factor(df$Par1)
-df$Par2 <- factor(df$Par2)
-
-# No need for dummy variables. I have no selfs and
-# no reciprocals
+data(Griffing56)
+df <- Griffing56
+head(df)
 
 # GRIFFING 2 ###############
 # asreml-r not OK!!!!!!! the overlay is not good
@@ -409,6 +551,9 @@ df$Par2 <- factor(df$Par2)
 mod1h <- mmer(Yield ~ 1,
                 random = ~overlay(Par1, Par2), data=df)
 summary(mod1h)$varcomp
+mod1m <- mmer.diallel(Yield ~ Par1 + Par2,
+                      data = df, fct = "GRIFFING4")
+mod1m
 
 # Repeated experiment ###########################################
 data("diallelMET")

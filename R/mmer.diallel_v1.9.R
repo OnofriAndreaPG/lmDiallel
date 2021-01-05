@@ -36,10 +36,11 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
     Par2 <- data[[pars[2]]]
   }
   # Ci sono repliche ?
-  withRep <- any(tapply(Y, list(Par1, Par2), length) > 1)
+  cond <- tapply(Y, list(Par1, Par2), length)
+  cond[is.na(cond)] <- 1
+  withRep <- any(cond > 1)
 
   # Dummy variables
-
   if(!is.null(Block)){
     df <- data.frame(Y, Block, Par1, Par2)
   } else {
@@ -51,8 +52,8 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   df$combination = factor(ifelse(as.character(Par1) <= as.character(Par2),
                               paste(Par1, Par2, sep =""),
                               paste(Par2, Par1, sep ="")))
-  df$selfs = ifelse(Par1 == Par2, 1, 0)
-  df$crosses <- ifelse(df$Par1 == df$Par2, 0, 1)
+  df$selfs = ifelse(as.character(Par1) == as.character(Par2), 1, 0)
+  df$crosses <- ifelse(as.character(Par1) == as.character(Par2), 0, 1)
   # print(df)
 
   # HAYMAN1 ##############
@@ -100,42 +101,129 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
     res <- summary(modh)$varcomp[,-c(3:4)]
     row.names(res) <- rnam
 
-  # GRIFFING1
-  }else if(fct == "GRIFFING1" & !is.null(Block)){
+  # GRIFFING1 and 3  ####
+  }else if(fct == "GRIFFING1" | fct == "GRIFFING3"){
+    if(!is.null(Block)){
+      form <- ~ Block + overlay(Par1, Par2) + combination + combination:dr
+      rnam <- c("Block", "GCA", "tSCA", "Reciprocals", "Residuals")
+    } else if(is.null(Block) & withRep == T){
+      form <- ~ overlay(Par1, Par2) + combination + combination:dr
+      rnam <- c("GCA", "tSCA", "Reciprocals", "Residuals")
+    } else if(is.null(Block) & withRep == F){
+      form <- ~ overlay(Par1, Par2) + combination
+      rnam <- c("GCA", "tSCA", "Reciprocals")
+    }
     modh <- sommer::mmer(Y ~ 1,
-             random = ~ Block
-               + overlay(Par1, Par2) # GCA
-               + combination # tSCA
-               + combination:dr, verbose = F, # REC
+             random = form,
+             verbose = F,
              data = df)
     res <- summary(modh)$varcomp[,-c(3:4)]
-    row.names(res) <- c("Block", "GCA", "tSCA", "Reciprocals", "Residuals")
-  } else if(fct == "GRIFFING2" & !is.null(Block)){
+    row.names(res) <- rnam
+
+  # GRIFFING2 and 4 ####
+  } else if(fct == "GRIFFING2" | fct == "GRIFFING4"){
+    if(!is.null(Block)){
+      form <- ~ Block + overlay(Par1, Par2) + combination
+      rnam <- c("Block", "GCA", "tSCA", "Residuals")
+    } else if(is.null(Block) & withRep == T){
+      form <- ~ overlay(Par1, Par2) + combination
+      rnam <- c("GCA", "tSCA", "Residuals")
+    } else if(is.null(Block) & withRep == F){
+      form <- ~ overlay(Par1, Par2)
+      rnam <- c("GCA", "tSCA")
+    }
     modh <- sommer::mmer(Y ~ 1,
-             random = ~ Block
-               + overlay(Par1, Par2) # GCA
-               + combination, verbose = F, # tSCA
+             random = form,
+             verbose = F,
              data = df)
     res <- summary(modh)$varcomp[,-c(3:4)]
-    row.names(res) <- c("Block", "GCA", "tSCA", "Residuals")
-  } else if(fct == "GRIFFING3" & !is.null(Block)){
-    modh <- sommer::mmer(Y ~ 1,
-             random = ~ Block
-               + overlay(Par1, Par2) # GCA
-               + combination # SCA
-               + combination:dr, verbose = F, # REC
+    row.names(res) <- rnam
+
+  # GE2r ############
+  } else if(fct == "GE2r"){
+    if(!is.null(Block)){
+      form <- ~ Block + overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+        combination:crosses + combination:crosses:dr
+      rnam <- c("Block", "Variety", "h.i", "SCA", "Reciprocals", "Residuals")
+    } else if(is.null(Block) & withRep == T){
+      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+        combination:crosses + combination:crosses:dr
+      rnam <- c("Variety", "h.i", "SCA", "Reciprocals", "Residuals")
+    } else if(is.null(Block) & withRep == F){
+      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+        combination:crosses
+      rnam <- c("Variety", "h.i", "SCA", "Reciprocals")
+    }
+    modh <- sommer::mmer(Y ~ crosses,
+             random = form,
+             verbose = F,
              data = df)
     res <- summary(modh)$varcomp[,-c(3:4)]
-    row.names(res) <- c("Block", "GCA", "SCA", "Reciprocals", "Residuals")
-  } else if(fct == "GRIFFING4" & !is.null(Block)){
-    modh <- sommer::mmer(Y ~ 1,
-             random = ~ Block
-               + overlay(Par1, Par2) # GCA
-               + combination, # SCA
-               verbose = F,
+    row.names(res) <- rnam
+
+  # GE2 ######
+  } else if(fct == "GE2"){
+    if(!is.null(Block)){
+      form <- ~ Block + overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+        combination:crosses
+      rnam <- c("Block", "Variety", "h.i", "SCA", "Residuals")
+    } else if(is.null(Block) & withRep == T){
+      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+        combination:crosses
+      rnam <- c("Variety", "h.i", "SCA", "Residuals")
+    } else if(is.null(Block) & withRep == F){
+      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses
+      rnam <- c("Variety", "h.i", "SCA")
+    }
+    modh <- sommer::mmer(Y ~ crosses,
+             random = form,
+             verbose = F,
              data = df)
     res <- summary(modh)$varcomp[,-c(3:4)]
-    row.names(res) <- c("Block", "GCA", "SCA", "Residuals")
+    row.names(res) <- rnam
+
+  # GE3r ####
+  } else if(fct == "GE3r"){
+    if(!is.null(Block)){
+      form <- ~ Block + overlay(Par1, Par2):crosses + Par1:selfs +
+        combination:crosses + combination:crosses:dr
+      rnam <- c("Block", "GCAC", "Selfed par.", "SCA", "Reciprocals", "Residuals")
+    } else if(is.null(Block) & withRep == T){
+      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs +
+        combination:crosses + combination:crosses:dr
+      rnam <- c("GCAC", "Selfed par.", "SCA", "Reciprocals", "Residuals")
+    } else if(is.null(Block) & withRep == F){
+      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs +
+        combination:crosses
+      rnam <- c("GCAC", "Selfed par.", "SCA", "Reciprocals")
+    }
+    modh <- sommer::mmer(Y ~ crosses,
+             random = form,
+             verbose = F,
+             data = df)
+    res <- summary(modh)$varcomp[,-c(3:4)]
+    row.names(res) <- rnam
+
+  # GE3 ####
+  } else if(fct == "GE3"){
+    if(!is.null(Block)){
+      form <- ~ Block + overlay(Par1, Par2):crosses + Par1:selfs +
+        combination:crosses
+      rnam <- c("Block", "GCAC", "Selfed par.", "SCA", "Residuals")
+    } else if(is.null(Block) & withRep == T){
+      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs +
+        combination:crosses
+      rnam <- c("GCAC", "Selfed par.", "SCA", "Residuals")
+    } else if(is.null(Block) & withRep == F){
+      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs
+      rnam <- c("GCAC", "Selfed par.", "SCA")
+    }
+    modh <- sommer::mmer(Y ~ crosses,
+             random = form,
+             verbose = F,
+             data = df)
+    res <- summary(modh)$varcomp[,-c(3:4)]
+    row.names(res) <- rnam
   }
 
  return(res)
