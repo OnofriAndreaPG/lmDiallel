@@ -1,10 +1,10 @@
 # This functions create model matrices for diallel models
 # Date of last edit: 23/6/2020
-model.matrix.diallel <- function(obj){
-  return(obj$modMatrix)
+model.matrix.diallel <- function(object, ...){
+  return(object$modMatrix)
 }
 model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
-                                 fct = NULL, data = NULL, ML = F){
+                                 fct = NULL, data = NULL){
   if(is.null(fct)){
     # This is a formula based output ###############
     X1 <- model.matrix(formula, data)

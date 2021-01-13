@@ -8,7 +8,7 @@ Fitting diallel linear models
 Wrapper function for lm.fit and diallel models. It can be used to carry out several powerful methods for linear models, such as 'summary()', anova() or 'glht()' in the 'multcomp' package.
 }
 \usage{
-lm.diallel(formula, Block, Env, data, fct)
+lm.diallel(formula, Block, Env, fct, data)
 }
 \arguments{
   \item{formula}{
@@ -16,11 +16,9 @@ lm.diallel(formula, Block, Env, data, fct)
 }
 \item{Block}{used to specify an optional variable coding for blocks}
 \item{Env}{used to specify an optional variable coding for environments}
+\item{fct}{a string variable coding for the selected model. 8 main diallel models: Hayman's model 1 (="HAYMAN1"), Hayman's model 2 (="HAYMAN2"), Griffing's model 1 (="GRIFFING1"), Griffing's model 2 (="GRIFFING2"), Griffing's model 3 (="GRIFFING3"), Griffing's model 4 (="GRIFFING4"), Gardner-Eberhart model 2 (="GE2")  and Gardner-Eberhart model 3 (="GE3"). The strings "GE2r" and "GE3r" can be used to specify the 'enhanced' GE2 and GE3 models, including the effect of reciprocals (REC).}
 \item{data}{a 'data.frame' where to look for explanatory variables}
-\item{fct}{a string variable coding for the selected model. 6 main diallel models: Hayman's model 1 (="HAYMAN1"), Hayman's model 2 (="HAYMAN2"), Griffing's model 1 (="GRIFFING1"), Griffing's model 2 (="GRIFFING2"), Gardner-Eberhart model 2 (="GE2")  and Gardner-Eberhart model 3 (="GE3"). The strings "GE2r" and "GE3r" can be used to specify the 'enhanced' GE2 and GE3 models, including the effect of reciprocals (REC).}
 }
-
-
 \details{
 Notations for the 8 models
 \tabular{ll}{
@@ -67,12 +65,6 @@ In addition, non-null fits will have components assign, effects and (unless not 
 \author{
   Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
 }
-\note{
-  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \examples{
 data("hayman54")
 dMod <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,
@@ -94,12 +86,6 @@ dMod3 <- lm.diallel(Yield ~ Par1 + Par2,
 summary(dMod3, MSE = 7.10, dfr = 60)
 anova(dMod3, MSE = 7.10, dfr = 60)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
+
 \keyword{ diallel }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
+\keyword{ genetic effects }

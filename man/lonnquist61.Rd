@@ -16,9 +16,6 @@ Diallel experiment with six maize varieties and no reciprocals. The data here ar
     \item{\code{Yield}}{mean across blocks, a numeric vector}
   }
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
-}
 \author{
 Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
 }
@@ -33,7 +30,7 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 \cite{C. O. Gardner and S. A. Eberhart. 1966. Analysis and Interpretation of the Variety Cross Diallel and Related Populations. Biometrics, 22, 439-452. http://doi.org/10.2307/2528181}
 }
 \examples{
-data(lonnquist61)
+data("lonnquist61")
 dMod <- lm(Yield ~ H.BAR(Par1, Par2) + VEi(Par1, Par2) +
              Hi(Par1, Par2) + SCA(Par1, Par2),
                   data = lonnquist61)

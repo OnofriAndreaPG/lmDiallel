@@ -1,3 +1,27 @@
+# WORKING WITH RAW DATA  ####################################
+# Example 1. From Hayman 1954
+
+# install.packages("devtools") # Only at first instance
+# library(devtools)
+# install_github("OnofriAndreaPG/lmDiallel")
+library(lmDiallel)
+data("hayman54")
+dMod <- lm(Yield ~ Block + GCA(Par1, Par2) + tSCA(Par1, Par2) +
+              RGCA(Par1, Par2) + RSCA(Par1, Par2), data = hayman54)
+summary(dMod)
+anova(dMod)
+
+# Alternative, simpler
+dMod2 <- lm.diallel(Yield ~ Par1 + Par2, Block = Block,
+                    data = df, fct = "HAYMAN1")
+summary(dMod2)
+anova(dMod2)
+
+# Contrasts for genetical parameters
+library(multcomp)
+gh <- glht(linfct = diallel.eff(dMod2))
+summary(gh, test = adjusted(type = "none"))
+
 # WORKING WITH THE MEANS ####################################
 # Example 1. From Hayman 1954
 # MSE: 416.8273; DF: 63; 2 Blocks

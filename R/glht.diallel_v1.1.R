@@ -295,7 +295,7 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
 
 
 ### multiple comparison procedures
-glht.diallelMod <- function(linfct, ...) {
+glht.diallelMod <- function(model, linfct, ...) {
 
     ### extract factors and contrast matrices from `model'
     obj <- linfct$obj

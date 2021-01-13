@@ -1,6 +1,6 @@
 Package: lmDiallel
-Version: 0.7
-Date: 2020-05-07
+Version: 0.8
+Date: 2021-01-08
 Title: Linear fixed effects models for diallel crosses
 Authors@R: c(person("Andrea" , "Onofri", role = c("aut", "cre"), email="andrea.onofri@unipg.it"), 
              person("Niccolo", "Terzaroli", email="n.terzaroli@gmail.com", role = "aut"))

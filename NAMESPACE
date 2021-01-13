@@ -12,7 +12,8 @@ export(model.matrixDiallel, lm.diallel, mmer.diallel, matBlock,
        model.matrix.diallel, vcov.diallel, summary.diallel,
        anova.diallel, glht.diallelMod, diallel.eff,
        GCA, VEi, SP, RGCA, tSCA, SCA, SCA.G3, SCA.GE, RSCA,
-       REC, REC.G3, H.BAR, MDD, Hi, GCAC, DD)
+       REC, REC.G3, H.BAR, MDD, Hi, GCAC, DD, expand.diallel,
+       blockMatrixDiagonal)
 
 ## S3 methods
 S3method(summary, diallel)

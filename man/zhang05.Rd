@@ -19,9 +19,6 @@ Data collected in XXX with 5 parents, 2 reps and 2 environments
     \item{\code{Yield}}{yield, a numeric vector}
   }
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
-}
 \author{
 Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
 }
@@ -32,7 +29,7 @@ Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.ter
 \cite{Onofri, A., Terzaroli, N. & Russi, L. Linear models for diallel crosses: a review with R functions. Theor Appl Genet (2020). https://doi.org/10.1007/s00122-020-03716-8}
 }
 \examples{
-data(zhang05)
+data("zhang05")
 contrasts(zhang05$Block) <- c("contr.sum")
 contrasts(zhang05$Env) <- c("contr.sum")
 dMod <- lm(Yield ~ Env/Block + H.BAR(Par1, Par2) + VEi(Par1, Par2) +
@@ -44,6 +41,5 @@ anova(dMod)
 dMod2 <- lm(Yield ~ Env/Block + H.BAR(Par1, Par2) + VEi(Par1, Par2) +
                    Hi(Par1, Par2) + SCA(Par1, Par2), data = zhang05)
 summary(dMod2)$coefficients
-
 }
 \keyword{datasets}
