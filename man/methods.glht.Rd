@@ -5,6 +5,10 @@
 \alias{G2.eff}
 \alias{G3.eff}
 \alias{G4.eff}
+\alias{GE2.eff}
+\alias{GE3.eff}
+\alias{GE2r.eff}
+\alias{GE3r.eff}
 \alias{hayman1.eff}
 \alias{hayman2.eff}
 \title{Functions to retreive full list of genetical effects}

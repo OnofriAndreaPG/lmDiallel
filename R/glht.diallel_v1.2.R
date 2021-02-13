@@ -1,3 +1,241 @@
+GE3r.eff <- function(obj){
+  # Get the data
+  # obj <- dMod2; coef(dMod2)
+  assign <- attr(model.matrix(obj), "assign")
+  P1 <- obj$model[,2]
+  P2 <- obj$model[,3]
+  fct <- obj$fct
+  # Intercept
+  temp <- matrix(0, 1, length(assign))
+  X <- 1
+  temp[,assign == 0] <- X
+  row.names(temp) <- "Intercept"
+  i <- 0
+  if(obj$Block == T) {i <- 1}
+  # h.bar
+  X <- 1
+  temp1 <- matrix(0, 1, length(assign))
+  temp1[,assign == i + 1] <- X
+  row.names(temp1) <- "h.bar"
+  # SPi
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  levs <- c(levels(P1), levels(P2))
+  levs <- levels(factor(levs))
+  levs <- factor(levs)
+  temp2 <- matrix(0, length(levs), length(assign))
+  contrasts(levs) <- "contr.sum"
+  X <- model.matrix(~levs)[,-1]
+  temp2[,assign == i + 2] <- X
+  row.names(temp2) <- paste("sp", levs, sep = "_")
+  # GC
+  temp3 <- matrix(0, length(levs), length(assign))
+  temp3[,assign == i + 3] <- X
+  row.names(temp3) <- paste("gc", levs, sep = "_")
+  
+  # SCA
+  expl <- expand.grid(levs,levs)
+  X2 <- SCA(expl[,2], expl[,1])
+  temp4 <- matrix(0, length(X2[,1]), length(assign))
+  temp4[,assign == i + 4] <- X2
+  row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
+  # REC
+  X <- REC(expl[,2], expl[,1])
+  temp5 <- matrix(0, length(data.frame(X)[,1]), length(assign))
+  temp5[,assign == i + 5] <- X
+  row.names(temp5) <- paste("r", "_", expl[,2], ":", expl[,1], sep = "")
+  
+  X <- rbind(temp, temp1, temp2, temp3, temp4)
+  X <- X[apply(X, 1, function(x) !all(x==0)),]
+  return(X)
+}
+
+GE2r.eff <- function(obj){
+  # Get the data
+  # obj <- dMod2; coef(dMod2)
+  assign <- attr(model.matrix(obj), "assign")
+  P1 <- obj$model[,2]
+  P2 <- obj$model[,3]
+  fct <- obj$fct
+  # Intercept
+  temp <- matrix(0, 1, length(assign))
+  X <- 1
+  temp[,assign == 0] <- X
+  row.names(temp) <- "Intercept"
+  i <- 0
+  if(obj$Block == T) {i <- 1}
+  # h.bar
+  X <- 1
+  temp1 <- matrix(0, 1, length(assign))
+  temp1[,assign == i + 1] <- X
+  row.names(temp1) <- "h.bar"
+  # VEi
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  levs <- c(levels(P1), levels(P2))
+  levs <- levels(factor(levs))
+  levs <- factor(levs)
+  temp2 <- matrix(0, length(levs), length(assign))
+  contrasts(levs) <- "contr.sum"
+  X <- model.matrix(~levs)[,-1]
+  temp2[,assign == i + 2] <- X
+  row.names(temp2) <- paste("v", levs, sep = "_")
+  # Hi
+  # P1 <- factor(as.character(P1))
+  # P2 <- factor(as.character(P2))
+  # levs <- c(levels(P1), levels(P2))
+  # levs <- levels(factor(levs))
+  # levs <- factor(levs)
+  temp3 <- matrix(0, length(levs), length(assign))
+  #contrasts(levs) <- "contr.sum"
+  #X <- model.matrix(~levs)[,-1]
+  temp3[,assign == i + 3] <- X
+  row.names(temp3) <- paste("h", levs, sep = "_")
+  
+  # SCA
+  expl <- expand.grid(levs,levs)
+  X2 <- SCA(expl[,2], expl[,1])
+  temp4 <- matrix(0, length(X2[,1]), length(assign))
+  temp4[,assign == i + 4] <- X2
+  row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
+  
+  # REC
+  X <- REC(expl[,2], expl[,1])
+  temp5 <- matrix(0, length(data.frame(X)[,1]), length(assign))
+  temp5[,assign == i + 5] <- X
+  row.names(temp5) <- paste("r", "_", expl[,2], ":", expl[,1], sep = "")
+  
+  X <- rbind(temp, temp1, temp2, temp3, temp4, temp5)
+  
+  # tSCA - NO
+  # expl <- expand.diallel(as.character(levs), 2)
+  # X <- tSCA(expl[,1], expl[,2])
+  # temp2 <- matrix(0, length(X[,1]), length(assign))
+  # temp2[,assign == i + 2] <- X
+  # row.names(temp2) <- paste("ts", "_", expl[,1], ":", expl[,2], sep = "")
+  # rimuovere le righe senza elementi non-zero
+  # X <- rbind(temp, temp1, temp2)
+  X <- X[apply(X, 1, function(x) !all(x==0)),]
+  return(X)
+}
+
+GE3.eff <- function(obj){
+  # Get the data
+  # obj <- dMod2; coef(dMod2)
+  assign <- attr(model.matrix(obj), "assign")
+  P1 <- obj$model[,2]
+  P2 <- obj$model[,3]
+  fct <- obj$fct
+  # Intercept
+  temp <- matrix(0, 1, length(assign))
+  X <- 1
+  temp[,assign == 0] <- X
+  row.names(temp) <- "Intercept"
+  i <- 0
+  if(obj$Block == T) {i <- 1}
+  # h.bar
+  X <- 1
+  temp1 <- matrix(0, 1, length(assign))
+  temp1[,assign == i + 1] <- X
+  row.names(temp1) <- "h.bar"
+  # SPi
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  levs <- c(levels(P1), levels(P2))
+  levs <- levels(factor(levs))
+  levs <- factor(levs)
+  temp2 <- matrix(0, length(levs), length(assign))
+  contrasts(levs) <- "contr.sum"
+  X <- model.matrix(~levs)[,-1]
+  temp2[,assign == i + 2] <- X
+  row.names(temp2) <- paste("sp", levs, sep = "_")
+  # GC
+  temp3 <- matrix(0, length(levs), length(assign))
+  temp3[,assign == i + 3] <- X
+  row.names(temp3) <- paste("gc", levs, sep = "_")
+  
+  # SCA
+  expl <- expand.grid(levs,levs)
+  X2 <- SCA(expl[,2], expl[,1])
+  temp4 <- matrix(0, length(X2[,1]), length(assign))
+  temp4[,assign == i + 4] <- X2
+  row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
+  X <- rbind(temp, temp1, temp2, temp3, temp4)
+  
+  # tSCA - NO
+  # expl <- expand.diallel(as.character(levs), 2)
+  # X <- tSCA(expl[,1], expl[,2])
+  # temp2 <- matrix(0, length(X[,1]), length(assign))
+  # temp2[,assign == i + 2] <- X
+  # row.names(temp2) <- paste("ts", "_", expl[,1], ":", expl[,2], sep = "")
+  # rimuovere le righe senza elementi non-zero
+  # X <- rbind(temp, temp1, temp2)
+  X <- X[apply(X, 1, function(x) !all(x==0)),]
+  return(X)
+}
+
+GE2.eff <- function(obj){
+  # Get the data
+  # obj <- dMod2; coef(dMod2)
+  assign <- attr(model.matrix(obj), "assign")
+  P1 <- obj$model[,2]
+  P2 <- obj$model[,3]
+  fct <- obj$fct
+  # Intercept
+  temp <- matrix(0, 1, length(assign))
+  X <- 1
+  temp[,assign == 0] <- X
+  row.names(temp) <- "Intercept"
+  i <- 0
+  if(obj$Block == T) {i <- 1}
+  # h.bar
+  X <- 1
+  temp1 <- matrix(0, 1, length(assign))
+  temp1[,assign == i + 1] <- X
+  row.names(temp1) <- "h.bar"
+  # VEi
+  P1 <- factor(as.character(P1))
+  P2 <- factor(as.character(P2))
+  levs <- c(levels(P1), levels(P2))
+  levs <- levels(factor(levs))
+  levs <- factor(levs)
+  temp2 <- matrix(0, length(levs), length(assign))
+  contrasts(levs) <- "contr.sum"
+  X <- model.matrix(~levs)[,-1]
+  temp2[,assign == i + 2] <- X
+  row.names(temp2) <- paste("v", levs, sep = "_")
+  # Hi
+  # P1 <- factor(as.character(P1))
+  # P2 <- factor(as.character(P2))
+  # levs <- c(levels(P1), levels(P2))
+  # levs <- levels(factor(levs))
+  # levs <- factor(levs)
+  temp3 <- matrix(0, length(levs), length(assign))
+  #contrasts(levs) <- "contr.sum"
+  #X <- model.matrix(~levs)[,-1]
+  temp3[,assign == i + 3] <- X
+  row.names(temp3) <- paste("h", levs, sep = "_")
+  
+  # SCA
+  expl <- expand.grid(levs,levs)
+  X2 <- SCA(expl[,2], expl[,1])
+  temp4 <- matrix(0, length(X2[,1]), length(assign))
+  temp4[,assign == i + 4] <- X2
+  row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
+  X <- rbind(temp, temp1, temp2, temp3, temp4)
+  
+  # tSCA - NO
+  # expl <- expand.diallel(as.character(levs), 2)
+  # X <- tSCA(expl[,1], expl[,2])
+  # temp2 <- matrix(0, length(X[,1]), length(assign))
+  # temp2[,assign == i + 2] <- X
+  # row.names(temp2) <- paste("ts", "_", expl[,1], ":", expl[,2], sep = "")
+  # rimuovere le righe senza elementi non-zero
+  # X <- rbind(temp, temp1, temp2)
+  X <- X[apply(X, 1, function(x) !all(x==0)),]
+  return(X)
+}
+
 G4.eff <- function(obj){
   # Get the data
     assign <- attr(model.matrix(obj), "assign")
@@ -287,7 +525,16 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
        k <- G3.eff(obj)
     } else if(obj$fct == "GRIFFING4"){
        k <- G4.eff(obj)
+    } else if(obj$fct == "GE2"){
+      k <- GE2.eff(obj)
+    } else if(obj$fct == "GE3"){
+      k <- GE3.eff(obj)
+    } else if(obj$fct == "GE2r"){
+      k <- GE2r.eff(obj)
+    } else if(obj$fct == "GE3r"){
+      k <- GE3r.eff(obj)
     }
+
     linfct.list <- list(linfct = k, MSE = MSE, dfr = dfr, obj = obj)
     class(linfct.list) <- "diallelMod"
     return(linfct.list)
