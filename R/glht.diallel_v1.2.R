@@ -32,7 +32,7 @@ GE3r.eff <- function(obj){
   temp3 <- matrix(0, length(levs), length(assign))
   temp3[,assign == i + 3] <- X
   row.names(temp3) <- paste("gc", levs, sep = "_")
-  
+
   # SCA
   expl <- expand.grid(levs,levs)
   X2 <- SCA(expl[,2], expl[,1])
@@ -44,7 +44,7 @@ GE3r.eff <- function(obj){
   temp5 <- matrix(0, length(data.frame(X)[,1]), length(assign))
   temp5[,assign == i + 5] <- X
   row.names(temp5) <- paste("r", "_", expl[,2], ":", expl[,1], sep = "")
-  
+
   X <- rbind(temp, temp1, temp2, temp3, temp4)
   X <- X[apply(X, 1, function(x) !all(x==0)),]
   return(X)
@@ -91,22 +91,22 @@ GE2r.eff <- function(obj){
   #X <- model.matrix(~levs)[,-1]
   temp3[,assign == i + 3] <- X
   row.names(temp3) <- paste("h", levs, sep = "_")
-  
+
   # SCA
   expl <- expand.grid(levs,levs)
   X2 <- SCA(expl[,2], expl[,1])
   temp4 <- matrix(0, length(X2[,1]), length(assign))
   temp4[,assign == i + 4] <- X2
   row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
-  
+
   # REC
   X <- REC(expl[,2], expl[,1])
   temp5 <- matrix(0, length(data.frame(X)[,1]), length(assign))
   temp5[,assign == i + 5] <- X
   row.names(temp5) <- paste("r", "_", expl[,2], ":", expl[,1], sep = "")
-  
+
   X <- rbind(temp, temp1, temp2, temp3, temp4, temp5)
-  
+
   # tSCA - NO
   # expl <- expand.diallel(as.character(levs), 2)
   # X <- tSCA(expl[,1], expl[,2])
@@ -153,7 +153,7 @@ GE3.eff <- function(obj){
   temp3 <- matrix(0, length(levs), length(assign))
   temp3[,assign == i + 3] <- X
   row.names(temp3) <- paste("gc", levs, sep = "_")
-  
+
   # SCA
   expl <- expand.grid(levs,levs)
   X2 <- SCA(expl[,2], expl[,1])
@@ -161,7 +161,7 @@ GE3.eff <- function(obj){
   temp4[,assign == i + 4] <- X2
   row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
   X <- rbind(temp, temp1, temp2, temp3, temp4)
-  
+
   # tSCA - NO
   # expl <- expand.diallel(as.character(levs), 2)
   # X <- tSCA(expl[,1], expl[,2])
@@ -215,7 +215,7 @@ GE2.eff <- function(obj){
   #X <- model.matrix(~levs)[,-1]
   temp3[,assign == i + 3] <- X
   row.names(temp3) <- paste("h", levs, sep = "_")
-  
+
   # SCA
   expl <- expand.grid(levs,levs)
   X2 <- SCA(expl[,2], expl[,1])
@@ -223,7 +223,7 @@ GE2.eff <- function(obj){
   temp4[,assign == i + 4] <- X2
   row.names(temp4) <- paste("s", "_", expl[,2], ":", expl[,1], sep = "")
   X <- rbind(temp, temp1, temp2, temp3, temp4)
-  
+
   # tSCA - NO
   # expl <- expand.diallel(as.character(levs), 2)
   # X <- tSCA(expl[,1], expl[,2])
@@ -543,6 +543,37 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
 
 ### multiple comparison procedures
 glht.diallelMod <- function(model, linfct, ...) {
+    obj <- linfct$obj
+    if(obj$Env == F){
+    ### extract factors and contrast matrices from `model'
+    # obj <- linfct$obj
+    MSE <- linfct$MSE
+    dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
+    k <- linfct$linfct
+
+    coefMod <- coef(obj)
+    vcovMod <- vcov(obj, MSE = MSE)
+    args <- list(coef = coefMod, vcov = vcovMod, df = 26)
+    class(args) <- "parm"
+    ret <- multcomp::glht(args, k)
+    return(ret)
+    } else {
+    newData <- data.frame(Yield = obj$model[,1],
+                      Par1 = obj$model[,2],
+                      Par2 = obj$model[,3],
+                      BlockEnv = paste(obj$model$`(Block)`,
+                                       obj$model$`(Env)`, sep = ":"))
+    newFit <- lm.diallel(Yield ~ Par1 + Par2, data = newData,
+                      Block = BlockEnv,
+                      fct = obj$fct)
+    ret <- glht(linfct = diallel.eff(newFit))
+    return(ret)
+    }
+
+}
+
+
+glht.diallelMod2 <- function(model, linfct, ...) {
 
     ### extract factors and contrast matrices from `model'
     obj <- linfct$obj
