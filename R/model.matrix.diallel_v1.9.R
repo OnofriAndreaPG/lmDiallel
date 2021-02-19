@@ -1096,7 +1096,7 @@ REC <- function(P1, P2, data = NULL){
   P1c <- as.character(P1); P2c <- as.character(P2)
   mate <- factor(P1n*10 + P2n)
   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
-  dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
+  dr <- ifelse(P1c == P2c, 0, ifelse(P1c > P2c, -1, 1))
   combLev <- factor( paste(P1c, P2c, sep = ":") )
 
   last <- c(); cont = 1

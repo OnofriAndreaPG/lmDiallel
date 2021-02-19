@@ -34,6 +34,7 @@
 }
 \examples{
 library(lmDiallel)
+library(multcomp)
 
 # Data with replicates
 data("hayman54")

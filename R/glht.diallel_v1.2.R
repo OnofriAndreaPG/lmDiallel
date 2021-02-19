@@ -490,7 +490,7 @@ hayman1.eff <- function(obj){
     row.names(temp1) <- paste("g", levs, sep = "_")
     # RGCA
     temp3[,assign == i + 3] <- X
-    row.names(temp3) <- paste("j", levs, sep = "_")
+    row.names(temp3) <- paste("rg", levs, sep = "_")
     # tSCA
     expl <- expand.grid(levs,levs)
     X <- tSCA(expl[,2], expl[,1])
@@ -573,22 +573,22 @@ glht.diallelMod <- function(model, linfct, ...) {
 }
 
 
-glht.diallelMod2 <- function(model, linfct, ...) {
-
-    ### extract factors and contrast matrices from `model'
-    obj <- linfct$obj
-    MSE <- linfct$MSE
-    dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
-    k <- linfct$linfct
-
-    coefMod <- coef(obj)
-    vcovMod <- vcov(obj, MSE = MSE)
-    args <- list(coef = coefMod, vcov = vcovMod, df = 26)
-    class(args) <- "parm"
-    ret <- multcomp::glht(args, k)
-    return(ret)
-
-}
+# glht.diallelMod2 <- function(model, linfct, ...) {
+#
+#     ### extract factors and contrast matrices from `model'
+#     obj <- linfct$obj
+#     MSE <- linfct$MSE
+#     dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
+#     k <- linfct$linfct
+#
+#     coefMod <- coef(obj)
+#     vcovMod <- vcov(obj, MSE = MSE)
+#     args <- list(coef = coefMod, vcov = vcovMod, df = 26)
+#     class(args) <- "parm"
+#     ret <- multcomp::glht(args, k)
+#     return(ret)
+#
+# }
 
 expand.diallel <- function(pars, mating = 1){
   pars <- sort(pars)
