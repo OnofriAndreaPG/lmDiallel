@@ -10,12 +10,13 @@ Specific Combining Ability
 SCA effect to fit Hayman2, Griffing3 (SCA.G3), GE2 and GE3 (SCA.GE) models with \code{lm} function
 }
 \usage{
-SCA(P1, P2, data)
-SCA.G3(P1, P2, data)
+SCA(P1, P2, type = "fix", data)
+SCA.G3(P1, P2,  type = "fix", data)
 }
 \arguments{
 \item{P1}{\code{a variable for the first parent}}
   \item{P2}{\code{a variable for the second parent}}
+  \item{type}{\code{a variable for model selection. May be "fix" (fixed model) or "random" (random model).}}
   \item{data}{\code{a 'data.frame' where to look for explanatory variables}}
 }
 \details{

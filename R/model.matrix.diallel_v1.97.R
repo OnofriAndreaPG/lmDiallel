@@ -11,7 +11,7 @@ model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
     X <- X1[,-1]
     attr(X, "assign") <- attr(X1, "assign")[-1]
   } else {
-  # fct based output #############################
+  # fct based output
   mf <- match.call(expand.dots = FALSE) # Riprende la chiamata, con i nomi
   m <- match(c("formula", "Block", "Env", "data"), names(mf), 0L) # Trova nella chiamata la formula. m è la posizione della formula nella chiamata
   mf <- mf[c(1L, m)]
@@ -151,7 +151,7 @@ if(is.null(Env) == T){
                     , length(rec[1,]))
       levs <- rep(groups, reps)
       attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "SCA", "Reciprocals",
+      namEffs <- c(namEffs, "GCA", "tSCA", "Reciprocals",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
 
@@ -174,7 +174,7 @@ if(is.null(Env) == T){
                       length(SCA[1,]))
       levs <- rep(groups, reps)
       attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "SCA",
+      namEffs <- c(namEffs, "GCA", "tSCA",
                                  "Residuals")
       attr(X, "namEff") <- namEffs
     } else if(fct == "GRIFFING3"){
@@ -182,7 +182,8 @@ if(is.null(Env) == T){
       # GRIFFING 3 - Reciprocal effects, no selfs ###################
       Z <- GCA(P1, P2)
       SCA <- SCA.G3(P1, P2)
-      rec <- REC.G3(P1, P2)
+      # rec <- REC.G3(P1, P2)
+      rec <- REC(P1, P2) # Corrected on 2/3/21
       X <- cbind(X, Z, SCA, rec)
       groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
       reps <- c(reps, length(Z[1,]),
@@ -190,13 +191,13 @@ if(is.null(Env) == T){
                 , length(rec[1,]))
       levs <- rep(groups, reps)
       attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "SCA", "Reciprocals",
+      namEffs <- c(namEffs, "GCA", "tSCA", "Reciprocals",
                    "Residuals")
       attr(X, "namEff") <- namEffs
 
     } else if(fct == "GRIFFING4"){
 
-      # GRIFFING 14 - No reciprocals, no selfs #########
+      # GRIFFING 4 - No reciprocals, no selfs #########
       Z <- GCA(P1, P2)
       SCA <- SCA.G3(P1, P2)
       X <- cbind(X, Z, SCA)
@@ -205,7 +206,7 @@ if(is.null(Env) == T){
                 length(SCA[1,]))
       levs <- rep(groups, reps)
       attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "SCA",
+      namEffs <- c(namEffs, "GCA", "tSCA",
                    "Residuals")
       attr(X, "namEff") <- namEffs
 
@@ -288,26 +289,10 @@ if(is.null(Env) == T){
     } else if(fct == "GE3"){
       # GE3 - Senza reciproci ###############################################
       # 23/03/2020
-
-      # Matrix for crosses
-      #crM <- matrix(crosses, n, 1)
       crM <- H.BAR(P1, P2)
-      # colnames(crM) <- "h.bar"
-
-      # Matrix for selfs
-      # slM <- H.BAR(crosses)
-      # colnames(slM) <- "Selfs"
-      #
-      # Matrix for GCA
       H <- SP(P1, P2)
-
-
       Z <- GCAC(P1, P2)
-
-
-      # Matrix for sca
       SCA <- SCA(P1, P2)
-      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
       # Building incidence matrix (0:5)
       X <- cbind(X, crM, H, Z, SCA)
@@ -367,16 +352,26 @@ if(is.null(Env) == T){
       }
   } else {
     # GE Data ####################################
-    Block <- factor(Block)
-    Env <- factor(Env)
-    datasetS <- data.frame(Id= 1:length(Block), Env, Block, Par1, Par2)
-    datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
-                   datasetS$Par2, datasetS$Block), ]
-
     # Creazione matrice incidenza (per ogni ambiente)
-    matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
-              model.matrixDiallel(~ df$Par1+df$Par2, df$Block,
+    # Da ogni matrice viene rimossa l'intercetta
+    # Le matrici sono impilate
+    Env <- factor(Env)
+    if(!is.null(Block)){
+      Block <- factor(Block)
+      datasetS <- data.frame(Id = 1:length(Par1), Env, Block, Par1, Par2)
+      datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
+                   datasetS$Par2, datasetS$Block), ]
+      matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
+              model.matrixDiallel(~ df$Par1 + df$Par2, df$Block,
                   fct = fct)})
+    } else {
+      datasetS <- data.frame(Id = 1:length(Par1), Env, Par1, Par2)
+      datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
+                   datasetS$Par2), ]
+      matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
+              model.matrixDiallel(~ df$Par1 + df$Par2, fct = fct)})
+    }
+
     mats <- matsOr
     mats <- lapply(mats, function(x) x[, -1])
     for(i in 1:length(levels(datasetS$Env))) colnames(mats[[i]]) <- paste(colnames(mats[[i]]), names(mats)[i], sep = ":")
@@ -395,6 +390,9 @@ if(is.null(Env) == T){
     asgn <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn))
     attr(X, "assign") <- asgn
     attr(X, "namEff") <- as.character( unlist( lapply(matsOr, function(x) attr(x, "namEff"))[1] ) )
+    # asgn2 <- c(unlist(asgnList[1]),unlist(lapply(asgnList[-1], function(x) unlist(x))) )
+    # asgn2 <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn2))
+    # attr(X, "assign2") <- asgn2
   }}
   return(X)
 }
@@ -449,7 +447,7 @@ matBlock <- function(formula){
 #   Z
 # }
 
-GCA <- function(P1, P2, data = NULL){
+GCA <- function(P1, P2, type = "fix", data = NULL){
   # This is modified to work with mating design 4
   if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
@@ -457,6 +455,9 @@ GCA <- function(P1, P2, data = NULL){
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
   }
+  if(type == "random"){
+      Z <- sommer::overlay(P1, P2)
+  } else {
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   levs <- c(levels(P1), levels(P2))
@@ -467,25 +468,27 @@ GCA <- function(P1, P2, data = NULL){
   contrasts(Z2n) <- c("contr.sum")
   Z1 <- model.matrix(~ Z1n)
   Z2 <- model.matrix(~ Z2n)
-  # contrasts(P1) <- c("contr.sum") #Parte da qui
-  # contrasts(P2) <- c("contr.sum")
-  # Z1 <- model.matrix(~P1)
-  # Z2 <- model.matrix(~P2)
   Z <- (Z1 + Z2)
   Z <- Z[,-1]
-  #nams <- paste("g_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   nams <- paste("g_", levs[1:(length(levs)-1)], sep="")
   colnames(Z) <- c(nams)
+  }
   Z
 }
 
-VEi <- function(P1, P2, data = NULL){
+VEi <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
+    }
+  if(type == "random"){
+    Z <- GCA(P1, P2, type = "random")
+    # Z <- Z/2
+    return(Z)
+  } else {
+
   # For GE2 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -497,16 +500,23 @@ VEi <- function(P1, P2, data = NULL){
   Z <- Z[,-1]
   nams <- paste("v_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   colnames(Z) <- c(nams)
-  Z
+  Z }
 }
 
-SP <- function(P1, P2, data = NULL){
+SP <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
+    }
+  if(type == "random"){
+    crosses <- ifelse(P1 == P2, 0, 1)
+    Z <- GCA(P1, P2, type = "random") * crosses
+    #colnames(Z) <- sub("combination", "", colnames(Z))
+    Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
   # For GE3 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -521,16 +531,24 @@ SP <- function(P1, P2, data = NULL){
   Z <- Z[,-1]
   nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   colnames(Z) <- c(nams)
-  Z
+  Z}
 }
 
-RGCA <- function(P1, P2, data = NULL){
+RGCA <- function(P1, P2, type = "fix", data = NULL){
   if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
   }
+    if(type == "random"){
+    dr <- ifelse(as.character(P1) < as.character(P2), -1,
+              ifelse(as.character(P1) == as.character(P2), 0, 1))
+    Z <- GCA(P1, P2, type = "random") * dr
+    # colnames(Z) <- sub("combination", "", colnames(Z))
+    # Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   contrasts(P1) <- c("contr.sum")
@@ -549,34 +567,26 @@ RGCA <- function(P1, P2, data = NULL){
   RGCA <- RGCA[,-length(levels(P1))] ##Correction 14/11/20. AO
   nams <- paste("rg_", levels(P1)[1:length(levels(P1))-1], sep="")
   colnames(RGCA) <- c(nams)
-  RGCA
+  RGCA }
 }
 
-# RGCA2 <- function(P1, P2){
-#   # Per ML estimation?
-#   P1 <- factor(as.character(P1))
-#   P2 <- factor(as.character(P2))
-#   contrasts(P1) <- c("contr.sum")
-#   contrasts(P2) <- c("contr.sum")
-#   p <- length(levels(P1))
-#   P1c <- as.character(P1)
-#   P2c <- as.character(P2)
-#   dr <- ifelse(P1c == P2c, 0, ifelse(P1c < P2c, -1, 1))
-#   Z1 <- model.matrix(~P1)[,-1]
-#   Z2 <- model.matrix(~P2)[,-1]
-#   colnames(Z1) <- paste("k_", c(1:(p-1)), sep="")
-#   colnames(Z2) <- colnames(Z1)
-#   RGCA <- cbind(Z1, Z2)
-# }
-
-tSCA <- function(P1, P2, data = NULL){
+tSCA <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
+    }
+  if(type == "random"){
+    combination <- factor( ifelse(as.character(P1) <= as.character(P2),
+                                 paste(P1, P2, sep =""),
+                                 paste(P2, P1, sep ="")) )
+    Z <- model.matrix(~ combination - 1)
+    colnames(Z) <- sub("combination", "", colnames(Z))
+    return(Z)
+  } else {
   # Matrix tSCA: final version: 6/5/2020
+    # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   P1c <- as.character(P1); P2c <- as.character(P2)
@@ -591,7 +601,7 @@ tSCA <- function(P1, P2, data = NULL){
   # the unnecessary combinations
   last <- seq(10, p*10, 10) + p
   levs <- as.numeric(levels(combination))
-  idx <- c() # Identifica la posizione degli ultimi
+  idx <- c() # Identifica la posizione degli ultimi livelli
    for(i in 1:length(last)){
        #i <- 2
        y <- which(levs == last[i])
@@ -637,84 +647,32 @@ tSCA <- function(P1, P2, data = NULL){
   #colnames(SCA) <- paste("ts_", colnames(SCA), sep = "")
   colnames(SCA) <- paste("ts_", colNamsOrd, sep = "")
   row.names(SCA) <- c(1:length(SCA[,1]))
-  SCA
+  return(SCA) }
 }
 
-# tSCA <- function(P1, P2){
-#   # Matrix tSCA: final version: 6/5/2020
-#   # P1 <- df$Par1; P2 <- df$Par2
-#   P1 <- factor(as.character(P1))
-#   P2 <- factor(as.character(P2))
-#   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
-#   P1c <- as.character(P1); P2c <- as.character(P2)
-#   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
-#   combLev <- factor( ifelse(P1c > P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
-#   mating <- factor(P1n*10 + P2n)
-#   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
-#   n <- length(combination)
-#
-#   # Step 1. gets the parameters to be estimated, removing
-#   # the unnecessary combinations
-#   last <- seq(10, p*10, 10) + p
-#   #levs <- as.numeric(levels(combination))
-#   levs <- levels(combination)
-#   idx <- c() # Identifica la posizione degli ultimi
-#    for(i in 1:length(last)){
-#        #i <- 2
-#        y <- which(levs == last[i])
-#        idx[i] <- y
-#   }
-#   levs <- as.character(levs[-idx])
-#   SCA <- matrix(0, nrow = n, ncol = length(levs))
-#   # colnames(SCA) <- levs
-#   colnames(SCA) <- as.character(combLev)[-idx]
-#
-#   # Step 2. Insert 1s for all levels, but the last one
-#   for(i in 1:length(levs)){
-#     cond <- (combination == colnames(SCA)[i])*1
-#     SCA[, i] <- cond
-#    }
-#   # Step 3. Insert the -1s for the last level. The last level of
-#   # Par2, within each level of Par1. The last level of Par1
-#   # requires another step
-#   for(i in 1:(length(last) - 1)){
-#       start <- ceiling(ifelse(i == 1, 1, last[i-1])/10) * 10 +1
-#       arrival <- last[i]
-#       sel <- seq(start, arrival, 1)
-#       tmp <- as.character( sel[1:i] ) # Se necessario, inverte i reciproci
-#       splits <- strsplit(tmp, "")
-#       reversed <- lapply(splits, rev)
-#       tmp <- as.character(lapply(reversed, paste, collapse = ""))
-#       sel[1:i] <- as.numeric(tmp)
-#       sel
-#       idx <- c() # Identifica la posizione di quelli da scrivere
-#       for(j in 1:length(sel)){
-#            #i <- 7
-#            y <- which(levs == sel[j])
-#            if(length(y) > 0) idx[j] <- y
-#       }
-#       idx
-#       SCA[,idx]
-#       idx1 <- last[i]
-#       SCA[combination == idx1, idx] <- -1
-#   }
-#   # Scrive il self dell'ultimo livello
-#   #SCA[combination == last[p],] <- - apply(SCA, 2, sum)
-#   SCA[combination == last[p],] <- 2
-#   for(i in 1:p) {SCA[combination == last[p], colnames(SCA) == paste(i, i, sep = "")] <- 1}
-#   colnames(SCA) <- paste("ts_", colnames(SCA), sep = "")
-#   SCA
-# }
-
-SCA <- function(P1, P2, data = NULL){
+SCA <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
+    }
+    if(type == "random"){
+    crosses <- ifelse(P1 == P2, 0, 1)
+    combination <- factor( ifelse(as.character(P1) <= as.character(P2),
+                                 paste(P1, P2, sep =""),
+                                 paste(P2, P1, sep ="")) )
+    Z <- model.matrix(~ combination - 1) * crosses
+    colnames(Z) <- sub("combination", "", colnames(Z))
+    Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
+
   # Matrix for SCA in heterosis model Hayman2
   # P1 <- df$Par1; P2 <- df$Par2
+  # P1 <- df2$Par1; P2 <- df2$Par2
+
+  # Da qui
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
@@ -724,10 +682,13 @@ SCA <- function(P1, P2, data = NULL){
   mating <- factor(P1n*10 + P2n)
   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
   n <- length(combination)
-  last <- seq(10, p*10, 10) + p
+  selflist <- as.numeric(levels(factor(combination[P1n == P2n])))
+  if(length(selflist) != 0){
+     last <- seq(10, p*10, 10) + p
+  } else { last <- seq(10, (p-1)*10, 10) + p }
   levs <- as.numeric(levels(combination))
   idx1 <- c()
-  for(i in 1:length(last)){ #Indica l'ultimo
+  for(i in 1:length(last)){ #Indica la posizione dell'ultimo in ogni gruppo
          y <- which(levs == last[i])
          idx1[i] <- y
   }
@@ -736,14 +697,14 @@ SCA <- function(P1, P2, data = NULL){
           y <- which(levs == (last[i] - 1))
           if(length(y) > 0) idx2[i] <- y
   }
-  selflist <- as.numeric(levels(factor(combination[P1n == P2n])))
+
   idx3 <- c()
   for(i in 1:length(selflist)){ #Indica il penultimo
           #i <- 2
           y <- which(levs == selflist[i])
           if(length(y) > 0) idx3[i] <- y
   }
-
+  idx1; idx2; idx3
   idx <- c(idx1, idx3)
   rimossi <- levs[idx]
   levs <- as.character(levs[-idx])
@@ -760,6 +721,7 @@ SCA <- function(P1, P2, data = NULL){
           cond <- (combination == colnames(SCA)[i])*1
           SCA[, i] <- cond
     }
+  SCA
     # Step 3. Insert the -1s for the last level. The last level of
     # Par2, within each level of Par1. The last level of Par1
     # requires another step
@@ -795,11 +757,114 @@ SCA <- function(P1, P2, data = NULL){
      SCA[combination == tmp[3], ] <- SCA[combination == tmp[3], ] + 1
      #colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
      colnames(SCA) <- paste("s_", colNamsOrd, sep = "")
-     SCA
+     SCA }
 }
 
-SCA.G3 <- function(P1, P2, data = NULL){
-  # SCA effect in absence of selfed parents (only crosses)
+# SCA.old <- function(P1, P2, type = "fix", data = NULL){
+#     if(!is.null(data)){
+#     P1Name <- deparse(substitute(P1))
+#     P2Name <- deparse(substitute(P2))
+#     P1 <- data[[P1Name]]
+#     P2 <- data[[P2Name]]
+#     }
+#     if(type == "random"){
+#     crosses <- ifelse(P1 == P2, 0, 1)
+#     combination <- factor( ifelse(as.character(P1) <= as.character(P2),
+#                                  paste(P1, P2, sep =""),
+#                                  paste(P2, P1, sep ="")) )
+#     Z <- model.matrix(~ combination - 1) * crosses
+#     colnames(Z) <- sub("combination", "", colnames(Z))
+#     Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+#     return(Z)
+#   } else {
+#
+#   # Matrix for SCA in heterosis model Hayman2
+#   # P1 <- df$Par1; P2 <- df$Par2
+#   P1 <- factor(as.character(P1))
+#   P2 <- factor(as.character(P2))
+#   P1n <- as.numeric(P1); P2n <- as.numeric(P2)
+#   P1c <- as.character(P1); P2c <- as.character(P2)
+#   combination <- factor(apply(cbind(P1n*10 + P2n, P2n * 10 + P1n), 1, min))
+#   combLev <- factor( ifelse(P1c < P2c, paste(P1c, P2c, sep = ":"), paste(P2c, P1c, sep = ":") ) )
+#   mating <- factor(P1n*10 + P2n)
+#   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
+#   n <- length(combination)
+#   last <- seq(10, p*10, 10) + p
+#   levs <- as.numeric(levels(combination))
+#   idx1 <- c()
+#   for(i in 1:length(last)){ #Indica l'ultimo
+#          y <- which(levs == last[i])
+#          idx1[i] <- y
+#   }
+#
+#   idx2 <- c()
+#   for(i in 1:length(last)){ #Indica il penultimo
+#           y <- which(levs == (last[i] - 1))
+#           if(length(y) > 0) idx2[i] <- y
+#   }
+#   selflist <- as.numeric(levels(factor(combination[P1n == P2n])))
+#   idx3 <- c()
+#   for(i in 1:length(selflist)){ #Indica il penultimo
+#           #i <- 2
+#           y <- which(levs == selflist[i])
+#           if(length(y) > 0) idx3[i] <- y
+#   }
+#   idx <- c(idx1, idx3)
+#   rimossi <- levs[idx]
+#   levs <- as.character(levs[-idx])
+#   rimossi <- c(rimossi, levs[length(levs)])
+#   levs <- levs[-length(levs)]
+#   SCA <- matrix(0, nrow = n, ncol = length(levs))
+#   colnames(SCA) <- paste(levs)
+#   #colnames(SCA)
+#   colNamsOrd <- levels(combLev)[-idx][-length(levels(combLev)[-idx])]
+#
+#     # Step 2. Insert 1s for all the levels, which are
+#     # in the SCA matrix
+#     for(i in 1:length(levs)){
+#           cond <- (combination == colnames(SCA)[i])*1
+#           SCA[, i] <- cond
+#     }
+#     # Step 3. Insert the -1s for the last level. The last level of
+#     # Par2, within each level of Par1. The last level of Par1
+#     # requires another step
+#     for(i in 1:(length(last) - 1)){
+#         start <- ceiling(ifelse(i == 1, 1, last[i-1])/10) * 10 +1
+#         arrival <- last[i]
+#         sel <- seq(start, arrival, 1)
+#         tmp <- as.character( sel[1:i] ) # Se necessario, inverte i reciproci
+#         splits <- strsplit(tmp, "")
+#         reversed <- lapply(splits, rev)
+#         tmp <- as.character(lapply(reversed, paste, collapse = ""))
+#         sel[1:i] <- as.numeric(tmp)
+#         #sel
+#         idx <- c() # Identifica la posizione di quelli da scrivere
+#         for(j in 1:length(sel)){
+#              #i <- 7
+#              y <- which(levs == sel[j])
+#              if(length(y) > 0) idx[j] <- y
+#         }
+#         idx
+#         SCA[,idx]
+#         idx1 <- last[i]
+#         SCA[combination == idx1, idx] <- -1
+#     }
+#      # SCA
+#      # Mancano le combinazioni degli ultimi 3 ibridi
+#      # 67, 68, 76, 78, 86, 87
+#      tmp <- seq(p-2, p, 1)
+#      tmp <- as.data.frame(combn(tmp, 2))
+#      tmp <- apply(tmp, 2, function(x) paste(x[1], x[2], sep = ""))
+#      SCA[combination == tmp[1], ] <- -1
+#      SCA[combination == tmp[2], ] <- SCA[combination == tmp[2], ] + 1
+#      SCA[combination == tmp[3], ] <- SCA[combination == tmp[3], ] + 1
+#      #colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
+#      colnames(SCA) <- paste("s_", colNamsOrd, sep = "")
+#      SCA }
+# }
+
+SCA.G3 <- function(P1, P2, type = "fix", data = NULL){
+  # tSCA effect in absence of selfed parents (only crosses)
   # and reciprocals
   if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
@@ -892,13 +957,13 @@ SCA.G3 <- function(P1, P2, data = NULL){
   SCA
 }
 
-SCA.GE <- function(P1, P2, data = NULL){
+SCA.GE <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
+    }
   # SCA for GE models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -935,7 +1000,7 @@ SCA.GE <- function(P1, P2, data = NULL){
   rimossi <- c(rimossi, levs[length(levs)])
   levs <- levs[-length(levs)]
   SCA <- matrix(0, nrow = n, ncol = length(levs))
-  colnames(SCA) <- paste(levs)
+  colnames(SCA) <- paste(levs) #paste("s_", levs, sep = "")
   # Step 2. Insert 1s for all the levels, which are
   # in the SCA matrix
   for(i in 1:length(levs)){
@@ -972,68 +1037,28 @@ SCA.GE <- function(P1, P2, data = NULL){
   SCA[combination == tmp[1], ] <- -1
   SCA[combination == tmp[2], ] <- SCA[combination == tmp[2], ] + 1
   SCA[combination == tmp[3], ] <- SCA[combination == tmp[3], ] + 1
+  colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
   SCA
+
 }
 
-
-# SCA <- function(combination, p){
-#   # Step 1. gets the parameters to be estimated, removing
-#   # the unnecessary combinations
-#   n <- length(combination)
-#   last <- seq(10, p*10, 10) + p
-#   levs <- as.numeric(levels(combination))
-#   idx <- c() # Identifica la posizione degli ultimi
-#   for(i in 1:length(last)){
-#       #i <- 2
-#       y <- which(levs == last[i])
-#       idx[i] <- y
-#     }
-#   levs <- as.character(levs[-idx])
-#   SCA <- matrix(0, nrow = n, ncol = length(levs))
-#   colnames(SCA) <- levs
-#   # Step 2. Insert 1s for all levels, but the last one
-#   for(i in 1:length(levs)){
-#       cond <- (combination == colnames(SCA)[i])*1
-#       SCA[, i] <- cond
-#       }
-#   # Step 3. Insert the -1s for the last level of
-#   # Par2, within each level of Par1. The last level of Par1
-#   # requires another step
-#   for(i in 1:(length(last) - 1)){
-#       start <- ceiling(ifelse(i == 1, 1, last[i-1])/10) * 10 +1
-#       arrival <- last[i]
-#       sel <- seq(start, arrival, 1)
-#       tmp <- as.character( sel[1:i] ) # Se necessario, inverte i reciproci
-#       splits <- strsplit(tmp, "")
-#       reversed <- lapply(splits, rev)
-#       tmp <- as.character(lapply(reversed, paste, collapse = ""))
-#       sel[1:i] <- as.numeric(tmp)
-#       sel
-#       idx <- c() # Identifica la posizione di quelli da scrivere
-#       for(j in 1:length(sel)){
-#         #i <- 7
-#         y <- which(levs == sel[j])
-#         if(length(y) > 0) idx[j] <- y
-#         }
-#       idx
-#       SCA[,idx]
-#       idx1 <- last[i]
-#       SCA[combination == idx1, idx] <- -1
-#   }
-#   #SCA[combination == last[p],] <- - apply(SCA, 2, sum)/length(SCA[combination == last[p],1])
-#   SCA[combination == last[p],] <- 2
-#   for(i in 1:p) {SCA[combination == last[p], colnames(SCA) == paste(i, i, sep = "")] <- 1}
-#   #SCA[combination == last[p], ]
-#   SCA
-# }
-
-RSCA <- function(P1, P2, data = NULL){
+RSCA <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
   }
+    if(type == "random"){
+    dr <- ifelse(as.character(P1) < as.character(P2), -1,
+              ifelse(as.character(P1) == as.character(P2), 0, 1))
+
+    Z <- tSCA(P1, P2, type = "random") * dr
+    # colnames(Z) <- sub("combination", "", colnames(Z))
+    Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
+
   # Derive the dummies and other infos
   # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
@@ -1076,18 +1101,28 @@ RSCA <- function(P1, P2, data = NULL){
      rec[leftr==p & rightr == i, rightc == i] <- -1
     }
   colnames(rec) <- paste("rs_", nams2, sep = "")
-  rec
+  rec }
   }
 
-
-REC <- function(P1, P2, data = NULL){
+REC <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
-  # P1 <- df$Par1; P2 <- df$Par2
+    }
+   if(type == "random"){
+    combination <- factor( ifelse(as.character(P1) <= as.character(P2),
+                                 paste(P1, P2, sep =""),
+                                 paste(P2, P1, sep ="")) )
+    dr <- ifelse(as.character(P1) < as.character(P2), -1,
+              ifelse(as.character(P1) == as.character(P2), 0, 1))
+
+    Z <- model.matrix(~ combination - 1) * dr
+    colnames(Z) <- sub("combination", "", colnames(Z))
+    Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   n <- length(P1)
@@ -1108,7 +1143,9 @@ REC <- function(P1, P2, data = NULL){
     y <- which(levs == last[i])
     if(length(y) > 0) idx[i] <- y
     }
+  idx <- idx[is.na(idx) == F]  # Added on 2/3/21
   levs <- as.character(levs[-idx])
+
   # levs
   rec <- matrix(0, nrow = n, ncol = length(levs))
   colnames(rec) <- paste(levs)
@@ -1121,19 +1158,19 @@ REC <- function(P1, P2, data = NULL){
   rec <- rec*dr
   # colnames(rec) <- paste("r_", colnames(rec), sep = "")
   colnames(rec) <- paste("r_", colNamsOrd, sep = "")
-  rec
+  rec }
 }
 
-REC.G3 <- function(P1, P2, data = NULL){
+REC.G3 <- function(P1, P2, type = "fix", data = NULL){
   # Reciprocal effects for designs with
   # no selfed parents
+  # P1 <- df$Par1;P2 <- df$Par2
   if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
   }
-  # P1 <- df$Par1; P2 <- df$Par2
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
   n <- length(P1)
@@ -1150,7 +1187,7 @@ REC.G3 <- function(P1, P2, data = NULL){
     if(i != j) {
       last[cont] <- paste(i, j, sep="")
       cont = cont + 1 } } }
-  last
+  # last
   last <- as.numeric(last)
   levs <- as.numeric(levels(mate))
   idx <- c()
@@ -1175,7 +1212,7 @@ REC.G3 <- function(P1, P2, data = NULL){
 }
 
 
-H.BAR <- function(P1, P2, data = NULL){
+H.BAR <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
@@ -1197,7 +1234,7 @@ H.BAR <- function(P1, P2, data = NULL){
   crM
 }
 
-MDD <- function(P1, P2, data = NULL){
+MDD <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
@@ -1234,13 +1271,21 @@ MDD <- function(P1, P2, data = NULL){
 #   H <- H[,-1]
 # }
 
-Hi <- function(P1, P2, data = NULL){
+Hi <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-  }
+    }
+  if(type == "random"){
+    crosses <- ifelse(P1 == P2, 0, 1)
+    Z <- GCA(P1, P2, type = "random") * crosses
+    # colnames(Z) <- sub("combination", "", colnames(Z))
+    # Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
+
   # For GE2 and GE3 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -1256,16 +1301,24 @@ Hi <- function(P1, P2, data = NULL){
   H <- H[,-1]
   nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   colnames(H) <- c(nams)
-  H
+  H }
 }
 
-GCAC <- function(P1, P2, data = NULL){
-    if(!is.null(data)){
+GCAC <- function(P1, P2, type = "fix", data = NULL){
+  if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
   }
+  if(type == "random"){
+    selfs <- ifelse(P1 == P2, 1, 0)
+    Z <- model.matrix(~ P1 - 1) * selfs
+    # colnames(Z) <- sub("combination", "", colnames(Z))
+    # Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
+
   # For GE2 and GE3 models
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -1281,11 +1334,10 @@ GCAC <- function(P1, P2, data = NULL){
   H <- H[,-1]
   nams <- paste("gc_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   colnames(H) <- c(nams)
-  H
+  H}
 }
 
-
-DD <- function(P1, P2, data = NULL){
+DD <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))

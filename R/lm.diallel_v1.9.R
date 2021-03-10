@@ -182,7 +182,8 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 		     paste("Response:", deparse(formula(object)[[2L]]))),
 	     class = c("anova", "data.frame"))# was "tabular"
 
-    } else if(object$Env == F & (object$fct == "GE2" | object$fct == "GE2r")) {
+    } else if(object$Env == F &
+              (object$fct == "GE2" | object$fct == "GE2r")) {
     ## Analisi senza blocco, per GE2 e GE2r
     ## Deve ricalcolare in modo diverso
     ssr <- sum(object$residuals^2)
@@ -217,8 +218,9 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
                   class = c("anova", "data.frame"))# was "tabular"
       }
       #table
-    }else if(object$Env == T) {
-      # Analisi con anno
+    } else if(object$Env == T) {
+      # Analisi poliennale
+      MSEor <- MSE; dfrOr <- dfr
       X <- object$modMatrix
       Y <- object$response
       namEff <- object$namEff
@@ -227,18 +229,26 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       asgn <- attr(X, "assign")
       fct <- object$fct
       dataset <- object$model
-      names(dataset)[4:5] <- c("Block", "Env")
-      dataset$Block <- factor(dataset$Block)
-      dataset$Env <- factor(dataset$Env)
-      matsOr <- model.matrixDiallel(~dataset[,2]+dataset[,3],
+      if(object$Block == T){
+        names(dataset)[4:5] <- c("Block", "Env")
+        dataset$Block <- factor(dataset$Block)
+        dataset$Env <- factor(dataset$Env)
+        matsOr <- model.matrixDiallel(~dataset[,2] + dataset[,3],
                            dataset$Block,
                            fct = fct)
+      } else {
+        names(dataset)[4] <- c("Env")
+        dataset$Env <- factor(dataset$Env)
+        matsOr <- model.matrixDiallel(~dataset[,2] + dataset[,3],
+                                      fct = fct)
+      }
+
       asgn2 <- attr(matsOr, "assign")
+      resdf <- object$df.residual
       ss <- c()
       dfr <- c(); labTab <- c()
       rss <- sum(object$residuals^2)
       ss[1] <- rss
-      resdf <- object$df.residual
       dfr[1] <- resdf
       labTab[1] <- "Residuals"
       cont <- 2
@@ -257,6 +267,15 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
         ss[cont] <- ssGE; dfr[cont] <- dfGE
         labTab[cont] <- paste(namEff[i], "Env", sep = ":")
         cont <- cont + 1
+      } else {
+          if(object$Block == F) {
+            reg2 <- lm.fit(X2, Y)
+            ssGE <- sum(reg2$residuals^2)
+            dfGE <- reg2$df.residual
+            ss[cont] <- ssGE; dfr[cont] <- dfGE
+            labTab[cont] <- paste(namEff[i], "Env", sep = ":")
+            cont <- cont + 1
+          }
         }
 
       # Model with no effects
@@ -274,9 +293,24 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
       ss <- diff(ss); dfr <- diff(dfr)
       ss <- c(rev(ss), rss); dfr <- c(rev(dfr), resdf)
       labTab <- c("Environment", rev(labTab))
+      labTab[labTab=="Block"] <- "Env:Block"
       ms <- ss/dfr
-      MSE <- ms[length(ms)]
-      dfr1 <- dfr[length(dfr)]
+      if(is.null(MSEor)){
+        MSE <- ms[length(ms)]
+      } else {
+        MSE <- MSEor
+        ms[length(ms)] <- MSE
+      }
+      if(!is.null(dfrOr)){
+        dfr1 <- dfrOr
+        dfr[length(dfr)] <- dfrOr
+        ss[length(ss)] <- NA
+      } else {
+        dfr1 <- dfr[length(dfr)]
+      }
+
+      #resdf <- object$df.residual
+
       f <- ms/MSE
       P <- pf(f, dfr, dfr1, lower.tail = FALSE)
       table <- data.frame(dfr, ss, ms, f, P)

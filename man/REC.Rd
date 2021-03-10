@@ -8,11 +8,12 @@ Reciprocal Effect not parted into RGCA and RSCA
 Build incidence matrix to fit reciprocal effects in Griffing's model 1, 2, 4 (REC) and 3 (REC.G3) with \code{lm} function
 }
 \usage{
-REC(P1, P2, data)
+REC(P1, P2, type = "fix", data)
 }
 \arguments{
 \item{P1}{\code{a variable for the first parent}}
   \item{P2}{\code{a variable for the second parent}}
+  \item{type}{\code{a variable for model selection. May be "fix" (fixed model) or "random" (random model).}}
   \item{data}{\code{a 'data.frame' where to look for explanatory variables}}}
 
 \details{

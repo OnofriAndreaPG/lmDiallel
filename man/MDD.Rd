@@ -8,11 +8,12 @@ Mean Dominance Deviation effect
 It relates to the difference between the average yield of selfed parents and the average yield of crosses. DD effect to fit Hayman2 model with \code{lm} function
 }
 \usage{
-MDD(P1, P2, data)
+MDD(P1, P2, type = "fix", data)
 }
 \arguments{
   \item{P1}{\code{a variable for the first parent}}
   \item{P2}{\code{a variable for the second parent}}
+  \item{type}{\code{a variable for the model}}
   \item{data}{\code{a 'data.frame' where to look for explanatory variables}}
 }
 \references{

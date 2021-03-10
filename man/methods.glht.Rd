@@ -11,6 +11,9 @@
 \alias{GE3r.eff}
 \alias{hayman1.eff}
 \alias{hayman2.eff}
+\alias{MET1.eff}
+\alias{MET2.eff}
+\alias{MET3.eff}
 \title{Functions to retreive full list of genetical effects}
 \description{
   Diallel model parameters are estimated under a set of restrictions and, therefore, the methods 'coef' and 'summary' do not return the full list of genetical parameters. Therefore, the 'glht.diallelMod' method can be used, which works by way of a series of helper functions, providing the necessary contrast matrices.
@@ -43,7 +46,7 @@ fit <- lm.diallel(Ftime ~ Par1 + Par2, data = hayman54,
                   fct = "HAYMAN1")
 summary(fit)
 anova(fit)
-gh <- glht(linfct = diallel.eff(fit), adjust = "none")
+gh <- glht(linfct = diallel.eff(fit))
 }
 
 \keyword{diallel}

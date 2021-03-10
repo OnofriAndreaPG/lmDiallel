@@ -8,11 +8,12 @@ Selfed Parents effect
 SP effect to fit GE3 model with \code{lm} function
 }
 \usage{
-SP(P1, P2, data)
+SP(P1, P2, type = "fix", data)
 }
 \arguments{
   \item{P1}{\code{a variable for the first parent}}
   \item{P2}{\code{a variable for the second parent}}
+  \item{type}{\code{a variable for model selection. May be "fix" (fixed model) or "random" (random model).}}
   \item{data}{\code{a 'data.frame' where to look for explanatory variables}}
   }
 \details{

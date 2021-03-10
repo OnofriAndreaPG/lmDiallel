@@ -507,12 +507,98 @@ hayman1.eff <- function(obj){
     X <- X[apply(X, 1, function(x) !all(x==0)),]
     return(X)
   }
+MET1.eff <- function(obj){
+  Y <- obj$model[,1]
+  P1 <- factor(obj$model[,2])
+  P2 <- factor(obj$model[,3])
+  Blk <- factor(obj$model$`(Block)`)
+  Env <- factor(obj$model$`(Env)`)
+  fct <- obj$fct
+  temp <- data.frame(Y, P1, P2, Blk, Env)
+  mods <- plyr::dlply(temp, c("Env"),
+      function(df) lm.diallel(Y ~ P1 + P2,
+                              Block = Blk,
+                              fct = fct))
+  k_env <- function(ll){
+    res <- diallel.eff(ll)
+    res <- res$linfct
+    colnames(res) <- names(coef(ll))
+    res
+    }
+  mats <- lapply(mods, k_env)
+  # Rimuove l'intercetta
+  mats <- lapply(mats, function(x) x[-1, -1])
+  for(i in 1:length(levels(temp$Env))) colnames(mats[[i]]) <- paste(colnames(mats[[i]]), names(mats)[i], sep = ":")
+  for(i in 1:length(levels(temp$Env))) rownames(mats[[i]]) <- paste(rownames(mats[[i]]), names(mats)[i], sep = ":")
+  colNames <- unlist(lapply(mats, colnames))
+  rowNames <- unlist(lapply(mats, rownames))
 
-diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
+  mats <- lmDiallel::blockMatrixDiagonal(mats)
+  colnames(mats) <- colNames
+  rownames(mats) <- rowNames
+  mats2 <- matrix(0, length(mats[,1]), length(levels(temp$Env)))
+  k <- cbind(mats2, mats)
+  return(k)
+}
+
+MET2.eff <- function(obj){
+  Y <- obj$model[,1]
+  P1 <- factor(obj$model[,2])
+  P2 <- factor(obj$model[,3])
+  Blk <- factor(obj$model$`(Block)`)
+  Env <- factor(obj$model$`(Env)`)
+  fct <- obj$fct
+  temp <- data.frame(Y, P1, P2, Blk, Env)
+  mods <- plyr::dlply(temp, c("Env"),
+      function(df) lm.diallel(Y ~ P1 + P2,
+                              Block = Blk,
+                              fct = fct))
+  k_env <- function(ll){
+    res <- diallel.eff(ll)
+    res <- res$linfct
+    colnames(res) <- names(coef(ll))
+    res
+    }
+  mats <- lapply(mods, k_env)
+
+  # Rimuove l'intercetta
+  mats <- lapply(mats, function(x) x[-1, -1])
+  for(i in 1:length(levels(temp$Env))) colnames(mats[[i]]) <- paste(colnames(mats[[i]]), names(mats)[i], sep = ":")
+  for(i in 1:length(levels(temp$Env))) rownames(mats[[i]]) <- paste(rownames(mats[[i]]), names(mats)[i], sep = ":")
+  colNames <- unlist(lapply(mats, colnames))
+  rowNames <- unlist(lapply(mats, rownames))
+  k <- mats[[1]]
+  for(i in 2:length(mats)){
+    k <- cbind(k, mats[[i]])
+  }
+  k
+  mats2 <- matrix(0, length(k[,1]), length(mats))
+  k <- cbind(mats2, k)/length(mats)
+  return(k)
+}
+
+MET3.eff <- function(obj){
+  Y <- obj$model[,1]
+  P1 <- factor(obj$model[,2])
+  P2 <- factor(obj$model[,3])
+  Blk <- factor(obj$model$`(Block)`)
+  Env <- factor(obj$model$`(Env)`)
+  BlockEnv <- factor(paste(Blk, Env, sep = ":"))
+  fct <- obj$fct
+  temp <- data.frame(Y, P1, P2, BlockEnv)
+  mod <- lm.diallel(Y ~ P1 + P2, data = temp,
+                       Block = BlockEnv,
+                       fct = fct)
+  k <- diallel.eff(mod)
+  return(k)
+}
+
+diallel.eff <- function(obj, MSE = NULL, dfr = NULL, type = "all") {
   if(all(class(obj) != "diallel")) {
     cat("This method works only with diallel objects")
     stop()
   }
+  if(obj$Env == F){
     if(obj$fct == "HAYMAN1"){
        k <- hayman1.eff(obj)
     } else if(obj$fct == "HAYMAN2"){
@@ -534,6 +620,21 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
     } else if(obj$fct == "GE3r"){
       k <- GE3r.eff(obj)
     }
+  } else {
+    # Multiambiente: refitta il modello per ambiente
+    if(type == "all"){
+      k <- MET1.eff(obj)
+    } else if(type == "means"){
+      k <- MET2.eff(obj)
+    } else if(type == "reduced"){
+      k <- MET3.eff(obj)
+    }else {
+      print("Argument type may be either 'all' or 'means' or 'reduced'")
+      stop()
+    }
+  }
+
+
 
     linfct.list <- list(linfct = k, MSE = MSE, dfr = dfr, obj = obj)
     class(linfct.list) <- "diallelMod"
@@ -542,11 +643,41 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL) {
 
 
 ### multiple comparison procedures
+# glht.diallelMod <- function(model, linfct, ...) {
+#     obj <- linfct$obj
+#     if(obj$Env == F){
+#     ### extract factors and contrast matrices from `model'
+#     # obj <- linfct$obj
+#     MSE <- linfct$MSE
+#     dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
+#     k <- linfct$linfct
+#
+#     coefMod <- coef(obj)
+#     vcovMod <- vcov(obj, MSE = MSE)
+#     args <- list(coef = coefMod, vcov = vcovMod, df = dfr)
+#     class(args) <- "parm"
+#     ret <- multcomp::glht(args, k)
+#     return(ret)
+#     } else {
+#     newData <- data.frame(Yield = obj$model[,1],
+#                       Par1 = obj$model[,2],
+#                       Par2 = obj$model[,3],
+#                       BlockEnv = paste(obj$model$`(Block)`,
+#                                        obj$model$`(Env)`, sep = ":"))
+#     newFit <- lm.diallel(Yield ~ Par1 + Par2, data = newData,
+#                       Block = BlockEnv,
+#                       fct = obj$fct)
+#     ret <- glht(linfct = diallel.eff(newFit))
+#     return(ret)
+#     }
+#
+# }
+
+
 glht.diallelMod <- function(model, linfct, ...) {
-    obj <- linfct$obj
-    if(obj$Env == F){
+
     ### extract factors and contrast matrices from `model'
-    # obj <- linfct$obj
+    obj <- linfct$obj
     MSE <- linfct$MSE
     dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
     k <- linfct$linfct
@@ -557,38 +688,8 @@ glht.diallelMod <- function(model, linfct, ...) {
     class(args) <- "parm"
     ret <- multcomp::glht(args, k)
     return(ret)
-    } else {
-    newData <- data.frame(Yield = obj$model[,1],
-                      Par1 = obj$model[,2],
-                      Par2 = obj$model[,3],
-                      BlockEnv = paste(obj$model$`(Block)`,
-                                       obj$model$`(Env)`, sep = ":"))
-    newFit <- lm.diallel(Yield ~ Par1 + Par2, data = newData,
-                      Block = BlockEnv,
-                      fct = obj$fct)
-    ret <- glht(linfct = diallel.eff(newFit))
-    return(ret)
-    }
 
 }
-
-
-# glht.diallelMod2 <- function(model, linfct, ...) {
-#
-#     ### extract factors and contrast matrices from `model'
-#     obj <- linfct$obj
-#     MSE <- linfct$MSE
-#     dfr <- ifelse(is.null(linfct$dfr), obj$df.residual, linfct$dfr)
-#     k <- linfct$linfct
-#
-#     coefMod <- coef(obj)
-#     vcovMod <- vcov(obj, MSE = MSE)
-#     args <- list(coef = coefMod, vcov = vcovMod, df = 26)
-#     class(args) <- "parm"
-#     ret <- multcomp::glht(args, k)
-#     return(ret)
-#
-# }
 
 expand.diallel <- function(pars, mating = 1){
   pars <- sort(pars)
