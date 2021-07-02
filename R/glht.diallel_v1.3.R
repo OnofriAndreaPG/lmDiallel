@@ -263,7 +263,8 @@ G4.eff <- function(obj){
     row.names(temp1) <- paste("g", levs, sep = "_")
     # SCA
     expl <- expand.diallel(as.character(levs), 3)
-    X <- SCA.G3(expl[,1], expl[,2])
+    # X <- SCA.G3(expl[,1], expl[,2])
+    X <- SCA(expl[,1], expl[,2]) # Corrected on 2/7/21
     temp2 <- matrix(0, length(X[,1]), length(assign))
     temp2[,assign == i + 2] <- X
     row.names(temp2) <- paste("s", "_", expl[,1], ":", expl[,2], sep = "")
@@ -300,12 +301,14 @@ G3.eff <- function(obj){
     row.names(temp1) <- paste("g", levs, sep = "_")
     # SCA
     expl <- expand.diallel(as.character(levs), 3)
-    X <- SCA.G3(expl[,1], expl[,2])
+    # X <- SCA.G3(expl[,1], expl[,2])
+    X <- SCA(expl[,1], expl[,2]) # Corrected on 2/7/2021
     temp2 <- matrix(0, length(X[,1]), length(assign))
     temp2[,assign == i + 2] <- X
     row.names(temp2) <- paste("s", "_", expl[,1], ":", expl[,2], sep = "")
     # REC
-    X <- REC.G3(expl[,1], expl[,2])
+    # X <- REC.G3(expl[,1], expl[,2])
+    X <- REC(expl[,1], expl[,2]) # Corrected on 2/2/2021
     temp4 <- matrix(0, length(data.frame(X)[,1]), length(assign))
     temp4[,assign == i + 3] <- X
     row.names(temp4) <- paste("r", "_", expl[,1], ":", expl[,2], sep = "")

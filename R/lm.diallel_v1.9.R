@@ -31,14 +31,27 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
     Par1 <- mf[,2]
     Par2 <- mf[,3]
   } else {
-    Par1 <- data[[pars[1]]]
-    Par2 <- data[[pars[2]]]
+    # Par1 <- data[[pars[1]]]
+    # Par2 <- data[[pars[2]]]
+    Par1 <- mf[,2]
+    Par2 <- mf[,3]
   }
   # Par1 <- data[[pars[1]]]
   # Par2 <- data[[pars[2]]]
   # print(Block); print(Env); stop()
   # print(mf); stop()
-  X <- model.matrixDiallel(~Par1 + Par2, Block=Block, Env = Env, fct = fct)
+
+  # print(length(Y))
+  # print(length(Block))
+  # misRem <- which(is.na(Y) == T)
+  # Y <- Y[-misRem]
+  # print(misRem); stop()
+  # if(!is.null(Env)) Env <- Env[-misRem]
+  # if(!is.null(Block)) Block <- Block[-misRem]
+  # Par1 <- Par1[-misRem]
+  # Par2 <- Par2[-misRem]
+
+  X <- model.matrixDiallel(~ Par1 + Par2, Block=Block, Env = Env, fct = fct)
   # print(head(X))
   z <- lm.fit(X, Y)
   # if(ML == T){
@@ -128,7 +141,7 @@ anova.diallel <- function(object, MSE = NULL, dfr = NULL, ...)
 {
   if(is.null(object$Env)) {object$Env <- FALSE }
   if(object$Env == F){
-    ## Se non c'è MSE esplicito: uso del residuo come errore
+    ## Se non trova MSE esplicito: uso del residuo come errore
 
     # if(length(list(object, ...)) > 1L) return(anova.lmlist(object, ...))
     # object <- fit
