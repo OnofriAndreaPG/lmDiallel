@@ -19,8 +19,7 @@ Multi-environment half-diallel dataset with six parentals, in five blocks and te
   }
 }
 \author{
-Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \source{
 Onofri, A., Terzaroli, N. & Russi, L. Linear models for diallel crosses: a review with R functions. Theor Appl Genet (2020). https://doi.org/10.1007/s00122-020-03716-8
 }

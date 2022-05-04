@@ -18,8 +18,7 @@ Data for a diallel in tobacco with 2 reps
   }
 }
 \author{
-Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \source{
 \cite{B. I. Hayman (1954a). The Analysis of Variance of Diallel Tables. Biometrics, 10, 235-244. Table 5, page 241. http://doi.org/10.2307/3001877}
 }

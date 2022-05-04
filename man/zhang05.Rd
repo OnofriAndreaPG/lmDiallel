@@ -20,8 +20,7 @@ Data collected in XXX with 5 parents, 2 reps and 2 environments
   }
 }
 \author{
-Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \source{
 \cite{Zhang, Y., Kang, M.S. and Lamkey, K.R. (2005), DIALLEL-SAS05: A Comprehensive Program for Griffing's and Gardner&Eberhart Analyses. Agron. J., 97: 1097-1106. https://doi.org/10.2134/agronj2004.0260}
 }

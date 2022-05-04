@@ -20,8 +20,7 @@ returns a data.frame object}
 \cite{Onofri, A., Terzaroli, N. & Russi, L. Linear models for diallel crosses: a review with R functions. Theor Appl Genet (2020). https://doi.org/10.1007/s00122-020-03716-8}
 }
 \author{
-Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \examples{
 pars <- LETTERS[1:4]
 expand.diallel(pars, mating = 3)

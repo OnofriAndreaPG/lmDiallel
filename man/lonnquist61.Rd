@@ -17,8 +17,7 @@ Diallel experiment with six maize varieties and no reciprocals. The data here ar
   }
 }
 \author{
-Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \source{
 \cite{J. H. Lonnquist, C. O. Gardner. (1961) Heterosis in Intervarietal Crosses in Maize and Its Implication in Breeding Procedures. Crop Science, 1, 179-183. Table 1.}
 }

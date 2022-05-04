@@ -33,12 +33,7 @@ GE2r \tab Y ~ H.BAR(Par1, Par2) + VE.i(Par1, Par2) + H.i(Par1, Par2) + SCA(Par1,
 GE3r	\tab Y ~ H.BAR(Par1, Par2) + SP(Par1, Par2) + GCAC(Par1, Par2) + SCA(Par1, Par2) + RGCA(Par1, Par2) + RSCA(Par1, Par2)}
 }
 \value{
-RIGUARDARE TUTTO
-lm.diallel returns an object of class "lm" or for multiple responses of class c("mlm", "lm").
-
-The functions summary and anova are used to obtain and print a summary and analysis of variance table of the results. The generic accessor functions coefficients, effects, fitted.values and residuals extract various useful features of the value returned by lm.
-
-An object of class "lm" is a list containing at least the following components:
+lm.diallel returns an object of class  c("diallel", "lm"), that is a list containing at least the following components:
 \describe{
     \item{\code{coefficients}}{a named vector of coefficients}
     \item{\code{residuals}}{the residuals, that is response minus fitted values}
@@ -57,14 +52,12 @@ An object of class "lm" is a list containing at least the following components:
     \item{\code{model}}{if requested (the default), the model frame used}
     \item{\code{na.action}}{(where relevant) information returned by model.frame on the special handling of NAs}
     }
-In addition, non-null fits will have components assign, effects and (unless not requested) qr relating to the linear fit, for use by extractor functions such as summary and effects.
 }
 \references{
  \cite{Onofri, A., Terzaroli, N. & Russi, L. Linear models for diallel crosses: a review with R functions. Theor Appl Genet (2020). https://doi.org/10.1007/s00122-020-03716-8}
 }
 \author{
-  Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \examples{
 data("hayman54")
 dMod <- lm.diallel(Ftime ~ Par1 + Par2, Block = Block,

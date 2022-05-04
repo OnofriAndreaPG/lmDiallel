@@ -27,8 +27,7 @@ Returns a data frame of variance components with standard errors
 \cite{Covarrubias-Pazaran, G., 2016. Genome-Assisted Prediction of Quantitative Traits Using the R Package sommer. PLOS ONE 11, e0156744. https://doi.org/10.1371/journal.pone.0156744}
 }
 \author{
-  Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \examples{
 data("hayman54")
 rMod <- mmer.diallel(Ftime ~ Par1 + Par2, Block = Block,

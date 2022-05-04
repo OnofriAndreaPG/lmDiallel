@@ -25,7 +25,11 @@
 To be defined
 }
 \value{
-  \code{summary} computes (adjusted) p values for general linear hypotheses,
+\code{vcov.diallel}: a variance-covariance matrix
+\code{summary.diallel}: a data.frame of estimated parameters with standard errors
+\code{anova.diallel}: an ANOVA table
+\code{predict.diallel}: a vector of predictions from a diallel model
+\code{model.matrix.diallel}: a design matrix for the fitted diallel model
 }
 \references{
 \cite{Onofri, A., Terzaroli, N. & Russi, L. Linear models for diallel crosses: a review with R functions. Theor Appl Genet (2020). https://doi.org/10.1007/s00122-020-03716-8}

@@ -21,8 +21,7 @@ data(hayman54)
   }
 }
 \author{
-Andrea Onofri \email{(andrea.onofri@unipg.it)}, Niccolo' Terzaroli \email{(n.terzaroli@gmail.com)}, Luigi Russi \email{(luigi.russi@unipg.it)}
-}
+Andrea Onofri, Niccolo' Terzaroli, Luigi Russi}
 \source{
 \cite{Griffing, B., 1956. Concept of general and specific combining ability in relation to diallel crossing systems. Australian Journal of Biological Science 9, 463--493.}
 }
