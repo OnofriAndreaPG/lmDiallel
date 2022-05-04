@@ -7,4 +7,4 @@
 
 0 errors | 0 warnings | 1 note
 
-* This is a new release.
+* This is a re-submission (update) of a previous version of the same lmDiallel package.
