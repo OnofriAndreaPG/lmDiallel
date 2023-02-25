@@ -1,3 +1,4 @@
 ## Changes in 'lmDiallel'
 
 2021-06-22: First stable release, including both fixed and mixed effects diallel models.
+2023-02-25: Corrected buglet in lm.diallel, which did not permit to use designs without blocking

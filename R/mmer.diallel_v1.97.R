@@ -619,15 +619,18 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   if(fct == "HAYMAN1"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + overlay(Par1, Par2):dr +
+      form <- ~ Block + overlay(Par1, Par2, sparse = F) +
+        overlay(Par1, Par2, sparse = F):dr +
         combination + combination:dr # GCA + RGCA + tSCA + RSCA
       rnam <- c("Block", "GCA", "RGCA", "tSCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):dr +
+      form <- ~ overlay(Par1, Par2, sparse = F) +
+        overlay(Par1, Par2, sparse = F):dr +
         combination + combination:dr # GCA + RGCA + tSCA + RSCA
       rnam <- c("GCA", "RGCA", "tSCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):dr +
+      form <- ~ overlay(Par1, Par2, sparse = F) +
+        overlay(Par1, Par2, sparse = F):dr +
         combination # GCA + RGCA + tSCA + RSCA
       rnam <- c("GCA", "RGCA", "tSCA", "RSCA")
     }
@@ -636,16 +639,19 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   }else if(fct == "HAYMAN2"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + crosses + overlay(Par1, Par2) + overlay(Par1, Par2):dr +
-        overlay(Par1, Par2):selfs + combination + combination:dr
+      form <- ~ Block + crosses + overlay(Par1, Par2, sparse = F) +
+        overlay(Par1, Par2, sparse = F):dr +
+        overlay(Par1, Par2, sparse = F):selfs + combination + combination:dr
       rnam <- c("Block", "MDD", "GCA", "RGCA", "DD", "SCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ crosses + overlay(Par1, Par2) + overlay(Par1, Par2):dr +
-        overlay(Par1, Par2):selfs + combination + combination:dr
+      form <- ~ crosses + overlay(Par1, Par2, sparse = F) +
+        overlay(Par1, Par2, sparse = F):dr +
+        overlay(Par1, Par2, sparse = F):selfs + combination + combination:dr
       rnam <- c("MDD", "GCA", "RGCA", "DD", "SCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ crosses + overlay(Par1, Par2) + overlay(Par1, Par2):dr +
-        overlay(Par1, Par2):selfs + combination
+      form <- ~ crosses + overlay(Par1, Par2, sparse = F) +
+        overlay(Par1, Par2, sparse = F):dr +
+        overlay(Par1, Par2, sparse = F):selfs + combination
       rnam <- c("MDD", "GCA", "RGCA", "DD", "SCA", "RSCA")
     }
 

@@ -517,11 +517,19 @@ MET1.eff <- function(obj){
   Blk <- factor(obj$model$`(Block)`)
   Env <- factor(obj$model$`(Env)`)
   fct <- obj$fct
-  temp <- data.frame(Y, P1, P2, Blk, Env)
-  mods <- plyr::dlply(temp, c("Env"),
+  if(length(Blk) == 0){
+    temp <- data.frame(Y, P1, P2, Env)
+    mods <- plyr::dlply(temp, c("Env"),
+      function(df) lm.diallel(Y ~ P1 + P2,
+                              fct = fct))
+  } else {
+    temp <- data.frame(Y, P1, P2, Blk, Env)
+    mods <- plyr::dlply(temp, c("Env"),
       function(df) lm.diallel(Y ~ P1 + P2,
                               Block = Blk,
                               fct = fct))
+  }
+
   k_env <- function(ll){
     res <- diallel.eff(ll)
     res <- res$linfct
@@ -551,11 +559,18 @@ MET2.eff <- function(obj){
   Blk <- factor(obj$model$`(Block)`)
   Env <- factor(obj$model$`(Env)`)
   fct <- obj$fct
-  temp <- data.frame(Y, P1, P2, Blk, Env)
-  mods <- plyr::dlply(temp, c("Env"),
+    if(length(Blk) == 0){
+    temp <- data.frame(Y, P1, P2, Env)
+    mods <- plyr::dlply(temp, c("Env"),
+      function(df) lm.diallel(Y ~ P1 + P2,
+                              fct = fct))
+  } else {
+    temp <- data.frame(Y, P1, P2, Blk, Env)
+    mods <- plyr::dlply(temp, c("Env"),
       function(df) lm.diallel(Y ~ P1 + P2,
                               Block = Blk,
                               fct = fct))
+  }
   k_env <- function(ll){
     res <- diallel.eff(ll)
     res <- res$linfct
@@ -586,12 +601,19 @@ MET3.eff <- function(obj){
   P2 <- factor(obj$model[,3])
   Blk <- factor(obj$model$`(Block)`)
   Env <- factor(obj$model$`(Env)`)
-  BlockEnv <- factor(paste(Blk, Env, sep = ":"))
   fct <- obj$fct
-  temp <- data.frame(Y, P1, P2, BlockEnv)
-  mod <- lm.diallel(Y ~ P1 + P2, data = temp,
+  if(length(Blk) == 0){
+    temp <- data.frame(Y, P1, P2, Env)
+    mod <- lm.diallel(Y ~ P1 + P2, data = temp,
+                       Block = Env,
+                       fct = fct)
+  } else {
+    BlockEnv <- factor(paste(Blk, Env, sep = ":"))
+    temp <- data.frame(Y, P1, P2, BlockEnv)
+    mod <- lm.diallel(Y ~ P1 + P2, data = temp,
                        Block = BlockEnv,
                        fct = fct)
+  }
   k <- diallel.eff(mod)
   return(k)
 }
