@@ -2,19 +2,16 @@
 # Last edited: 23/6/2020
 lm.diallel <- function(formula, Block = NULL, Env = NULL,
                        fct = "GRIFFING2", data){
-  #formula Ftime + Block + Par1 + Par2, data = df
+  # formula Ftime + Block + Par1 + Par2, data = df
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
-
   m <- match(c("formula", "Block", "Env", "data"), names(mf), 0L)
   mf <- mf[c(1L, m)]
   mf$drop.unused.levels <- TRUE
   mf[[1L]] <- quote(stats::model.frame)
-
   mf <- eval(mf, parent.frame())
   mt <- attr(mf, "terms")
   Y <- model.response(mf, "numeric")
-
   mlm <- is.matrix(Y)
   ny <- if (mlm)
         nrow(Y)
@@ -31,72 +28,26 @@ lm.diallel <- function(formula, Block = NULL, Env = NULL,
     Par1 <- mf[,2]
     Par2 <- mf[,3]
   } else {
-    # Par1 <- data[[pars[1]]]
-    # Par2 <- data[[pars[2]]]
     Par1 <- mf[,2]
     Par2 <- mf[,3]
   }
-  # Par1 <- data[[pars[1]]]
-  # Par2 <- data[[pars[2]]]
-  # print(Block); print(Env); stop()
-  # print(mf); stop()
-
-  # print(length(Y))
-  # print(length(Block))
-  # misRem <- which(is.na(Y) == T)
-  # Y <- Y[-misRem]
-  # print(misRem); stop()
-  # if(!is.null(Env)) Env <- Env[-misRem]
-  # if(!is.null(Block)) Block <- Block[-misRem]
-  # Par1 <- Par1[-misRem]
-  # Par2 <- Par2[-misRem]
 
   X <- model.matrixDiallel(~ Par1 + Par2, Block=Block, Env = Env, fct = fct)
-  # print(head(X))
   z <- lm.fit(X, Y)
-  # if(ML == T){
-  #   if(fct == "HAYMAN1") {
-  #     if(is.null(Block)) {
-  #       res <- MLfit1(X, Y, z, Par1, Par2)
-  #     } else {
-  #       X2 <- model.matrixDiallel(~Par1 + Par2, Block = Block,
-  #                                  fct = fct, ML = T)
-  #       res <- MLfit1b(X2, Y, z, Par1, Par2)
-  #     }
-  #   } else if (fct == "HAYMAN2"){
-  #     res <- MLfit2(X, Y, z, Par1, Par2)
-  #   }
-  #   z$coefficients <- res$coefficients
-  #   z$residuals <- res$residuals
-  #   z$fitted.values <- res$fitted
-  #   z$assign <- res$assign
-  #   z$MLcoefficients <- res$MLcoefficients
-  #   z$LScoefficients <- res$LScoefficients
-  #   X <- res$X
-  #   }
   class(z) <- c(if (mlm) "mlm", "lm")
   z$response <- Y
-
   z$fct <- fct
   z$Env <- ifelse(is.null(Env), F, T)
   z$Block <- ifelse(is.null(Block), F, T)
   z$na.action <- attr(mf, "na.action")
   z$offset <- NULL
-    #z$contrasts <- attr(x, "contrasts")
+
   z$xlevels <- .getXlevels(mt, mf)
   z$call <- cl
   z$terms <- mt
   z$model <- mf
   z$namEff <- attr(X, "namEff")
   z$modMatrix <- X
-  # z$ML <- ML
-
-  # if (ret.x)
-  #       z$x <- x
-  # if (ret.y)
-  #       z$y <- y
-  # if (!qr)
-  #       z$qr <- NULL
   class(z) <- c("diallel", "lm")
   return(z)
 }

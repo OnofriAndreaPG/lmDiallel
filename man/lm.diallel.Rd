@@ -8,7 +8,7 @@ Fitting diallel linear models
 Wrapper function for lm.fit and diallel models. It can be used to carry out several powerful methods for linear models, such as 'summary()', anova() or 'glht()' in the 'multcomp' package.
 }
 \usage{
-lm.diallel(formula, Block, Env, fct, data)
+lm.diallel(formula, Block, Env, fct = "GRIFFING2", data)
 }
 \arguments{
   \item{formula}{

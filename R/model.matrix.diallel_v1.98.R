@@ -1,41 +1,47 @@
 # This functions create model matrices for diallel models
-# Date of last edit: 019/07/2021
+# Date of last edit: 19/07/2021
 # Removing limitation for less than 10 parentals
 model.matrix.diallel <- function(object, ...){
   return(object$modMatrix)
 }
+
 model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
                                  fct = NULL, data = NULL){
+  # At the beginning, it is necessary to assess the mating scheme
+  # and the presence of missing crosses. This is best done on the fct
+  # based part
+
   if(is.null(fct)){
     # This is a formula based output ###############
+    # This is used by one who knows what he is doing
     X1 <- model.matrix(formula, data)
     X <- X1[,-1]
     attr(X, "assign") <- attr(X1, "assign")[-1]
   } else {
-  # fct based output
-  mf <- match.call(expand.dots = FALSE) # Riprende la chiamata, con i nomi
-  m <- match(c("formula", "Block", "Env", "data"), names(mf), 0L) # Trova nella chiamata la formula. m rappresenta la posizione della formula nella chiamata
-  mf <- mf[c(1L, m)]
-  mf$drop.unused.levels <- TRUE
-  mf[[1L]] <- quote(stats::model.frame)
-  mf <- eval(mf, parent.frame())
-  mt <- attr(mf, "terms")
-  pars <- attr(mt, "term.labels")
+    # fct based output
+    mf <- match.call(expand.dots = FALSE) # Riprende la chiamata, con i nomi
+    m <- match(c("formula", "Block", "Env", "data"), names(mf), 0L) # Trova nella chiamata la formula. m rappresenta la posizione della formula nella chiamata
+    mf <- mf[c(1L, m)]
+    mf$drop.unused.levels <- TRUE
+    mf[[1L]] <- quote(stats::model.frame)
+    mf <- eval(mf, parent.frame())
+    mt <- attr(mf, "terms")
+    pars <- attr(mt, "term.labels")
 
-  bName <- deparse(substitute(Block))  # storing name of Blocks
-  Block <- model.extract(mf, "Block")
-  eName <- deparse(substitute(Env))  # storing name of Env
-  Env <- model.extract(mf, "Env")
+    bName <- deparse(substitute(Block))  # storing name of Blocks
+    Block <- model.extract(mf, "Block")
+    eName <- deparse(substitute(Env))  # storing name of Env
+    Env <- model.extract(mf, "Env")
 
-  if(missing(data) == T){
-    Par1 <- mf[,1]
-    Par2 <- mf[,2]
-  } else {
-    Par1 <- data[[pars[1]]]
-    Par2 <- data[[pars[2]]]
-  }
+    if(missing(data) == T){
+      Par1 <- mf[,1]
+      Par2 <- mf[,2]
+    } else {
+      Par1 <- data[[pars[1]]]
+      Par2 <- data[[pars[2]]]
+    }
 
-if(is.null(Env) == T){
+    if(is.null(Env) == T){
       n <- length(Par1)
       P1 <- factor(as.character(Par1))
       P2 <- factor(as.character(Par2))
@@ -63,17 +69,14 @@ if(is.null(Env) == T){
       # Matrix for GCA
       Z <- GCA(P1, P2)
 
-
       # Matrix tSCA
       SCA <- tSCA(P1, P2)
 
       #Matrix for RGCA
       RGCA <- RGCA(P1, P2)
 
-
       #Matrix for RSCA
       rec <- RSCA(P1, P2)
-
 
       # Building matrix (0:5)
       X <- cbind(X, Z, SCA, RGCA, rec)
@@ -87,13 +90,12 @@ if(is.null(Env) == T){
                                  "Residuals")
       attr(X, "namEff") <- namEffs
 
-      } else if(fct == "HAYMAN2"){
+    } else if(fct == "HAYMAN2"){
       # HAYMAN2 - SCA decomposta ###########
       # 23/03/2020
 
       # Matrix for crosses
       crM <- MDD(P1, P2)
-
 
       # Matrix for GCA
       Z <- GCA(P1, P2)
@@ -209,7 +211,7 @@ if(is.null(Env) == T){
                 length(SCA[1,]))
       levs <- rep(groups, reps)
       attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "tSCA",
+      namEffs <- c(namEffs, "GCA", "SCA",
                    "Residuals")
       attr(X, "namEff") <- namEffs
 
@@ -638,15 +640,15 @@ tSCA <- function(P1, P2, type = "fix", data = NULL){
   return(SCA) }
 }
 
-
 SCA <- function(P1, P2, type = "fix", data = NULL){
-    if(!is.null(data)){
+  # Edited on 10/3/2023
+  if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
     P1 <- data[[P1Name]]
     P2 <- data[[P2Name]]
-    }
-    if(type == "random"){
+  }
+  if(type == "random"){
     crosses <- ifelse(P1 == P2, 0, 1)
     combination <- factor( ifelse(as.character(P1) <= as.character(P2),
                                  paste(P1, P2, sep =""),
@@ -658,84 +660,71 @@ SCA <- function(P1, P2, type = "fix", data = NULL){
   } else {
 
   # Matrix for SCA in heterosis model Hayman2
+  # It is also used where the selfs are not includede
   P1 <- factor(as.character(P1)) #, levels = unique(P1))
   P2 <- factor(as.character(P2)) #, levels = unique(P1)) # Livelli uguali?
   P1c <- as.character(P1); P2c <- as.character(P2)
 
-  # combination
+  # create the combination levels
   tmp <- ifelse(P1c < P2c, paste(P1c, P2c, sep =":"),
          paste(P2c, P1c, sep = ":"))
   combination <- factor(tmp) #, levels = unique(tmp))
-
   combLev <- NA
 
+  # Create the matings (considers the reciprocals)
   mating <- P1:P2
-
   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
   n <- length(combination)
 
+  # See whether selfs are included and find the last level for each
+  # combination
   selflist <- levels(factor(combination[P1c == P2c]))
-
-  # See whether selfs are included and find the last level for each P1
   levs <- sort(unique(c(levels(P1), levels(P2))))
-  # tmp <- sapply(by(P1, P2, function(x) levels(x)), function(x) max(as.character(x)))
-  # tmp <- ifelse(names(tmp) < tmp, paste(names(tmp), tmp, sep = ":"), paste(tmp, names(tmp), sep = ":"))
   tmp <- paste(levs, max(levs), sep = ":")
+  parLevs <- levs
   last <- levels(factor(tmp, levels = unique(tmp)))
-
-  # tmp <- sapply(by(P2, P1, function(x) levels(x)), function(x) sort(as.character(x))[(length(x) - 1)])
-  # tmp <- ifelse(names(tmp) < tmp, paste(names(tmp), tmp, sep = ":"), paste(tmp, names(tmp), sep = ":"))
-  # lastButOne <- levels(factor(tmp, levels = unique(tmp)))
-  #
-  # tmp <- sapply(by(P2, P1, function(x) levels(x)), function(x) sort(as.character(x))[(length(x) - 2)])
-  # tmp <- ifelse(names(tmp) < tmp, paste(names(tmp), tmp, sep = ":"), paste(tmp, names(tmp), sep = ":"))
-  # lastButTwo <- levels(factor(tmp, levels = unique(tmp)))
-
   levs <- levels(combination)
+
+  # Cerca la posizione dell'ultimo in ogni gruppo
   idx1 <- c()
-  for(i in 1:length(last)){ #Indica la posizione dell'ultimo in ogni gruppo
+  for(i in 1:length(last)){
          y <- which(levs == last[i])
          # print(i); print(length(y))
          if(length(y) != 0) idx1[i] <- y else next
   }
-  # idx2 <- c()
-  # for(i in 1:length(last)){ #Indica il penultimo
-  #         y <- which(levs == lastButOne[i])
-  #         if(length(y) > 0) idx2[i] <- y
-  # }
-  #
-  # idx2b <- c()
-  # for(i in 1:length(last)){ #Indica il terzultimo
-  #         y <- which(levs == lastButTwo[i])
-  #         if(length(y) > 0) idx2b[i] <- y
-  # }
 
+  # cerca la posizione dei selfs, se esistenti
   idx3 <- c()
-  for(i in 1:length(selflist)){ #Indica i selfs
+  for(i in 1:length(selflist)){
           #i <- 2
           y <- which(levs == selflist[i])
           if(length(y) > 0) idx3[i] <- y
   }
+
+  # Definisce i parametr da stimare. Deve rimuovere gli ultimi livelli
+  # e i selfs, se esistenti. Deeve anche rimuover l'elemento con parentali
+  # (p - 2) e (p - 1)
   idx <- c(idx1, idx3)
   rimossi <- levs[idx]
   levs <- as.character(levs[-idx])
   rimossi <- c(rimossi, levs[length(levs)])
-  levs <- levs[-length(levs)]
+  levs <- levs[-length(levs)] # rimuove l'ultimo
+
+  # Step 1. Create an empty matrix
   SCA <- matrix(0, nrow = n, ncol = length(levs))
   colnames(SCA) <- paste(levs)
 
-  # Step 2. Insert 1s for all the levels, which are
-  # in the SCA matrix
+  # Step 2. Insert 1s for all the levels, which correspond
+  # to estimands
   for(i in 1:length(levs)){
           cond <- (combination == colnames(SCA)[i]) * 1
           SCA[, i] <- cond
-    }
+  }
 
-  # Step 3. Insert the -1s for the last level. The last level of
-  # Par2, within each level of Par1. The last level of Par1
-  # requires another step
+  # Step 3. Insert the -1s for the last level of
+  # Par2, within each level of Par1. This is only done for Par 1
+  # going from 1 to (p - 3), per gli altri ci vuole un altro step
   for(i in 1:(length(last) - 3)){
-    # i <- 1
     arrival <- last[i]
     tmp <- strsplit(arrival, ":")[[1]]
     revArrival <- paste(rev(tmp), collapse = ":")
@@ -743,7 +732,7 @@ SCA <- function(P1, P2, type = "fix", data = NULL){
     sel <- sapply(strsplit(colnames(SCA), ":"), function(i) any(i == tmp[1]))
     idx <- sapply(1:length(combination), function(i) any(lastEl == mating[i]))
     SCA[idx, sel] <- -1
-    SCA
+    # SCA
     }
 
   # Mancano le combinazioni degli ultimi 3 ibridi
@@ -753,27 +742,170 @@ SCA <- function(P1, P2, type = "fix", data = NULL){
 
     tmp <- seq(p - 2, p, 1)
     tmp <- as.data.frame(combn(tmp, 2))
-    tmp <- apply(tmp, 2, function(x) paste(levels(P1)[x[1]], levels(P2)[x[2]], sep = ":"))
+    # Edited on 10/3/2023, to avoid an error for mating schemes without selfs
+    # tmp <- apply(tmp, 2, function(x) paste(levels(P1)[x[1]], levels(P2)[x[2]], sep = ":"))
+    tmp <- apply(tmp, 2, function(x) paste(parLevs[x[1]], parLevs[x[2]], sep = ":"))
     tmp2 <- mapply(revParents, tmp)
 
-
+     # Si occupa del livello P1 = p -2 e P2 = P-1 che deve essere pari
+     # all'opposto della somma di tutti gli altri parametri
      SCA[combination == tmp[1], ] <- -1
      SCA[combination == tmp2[1], ] <- -1
 
+     # Si occupa del parametro per (p-2, p), che si ottiene come somma
+     # di tutti i parametri i cui parentali non sono uguali a (p - 2)
      tmp3 <- strsplit(tmp[2], ":")[[1]]
      sel <- sapply(strsplit(colnames(SCA), ":"), function(i) !any(i == tmp3[1]))
      SCA[combination == tmp[2], sel] <- 1
      SCA[combination == tmp2[2], sel] <- 1
 
+     # Si occupa del parametro per (p-1, p), che si ottiene come somma
+     # di tutti i parametri i cui parentali non sono uguali a (p - 1)
      tmp3 <- strsplit(tmp[3], ":")[[1]]
      sel <- sapply(strsplit(colnames(SCA), ":"), function(i) !any(i == tmp3[1]))
      SCA[combination == tmp[3], sel] <- 1
      SCA[combination == tmp2[3], sel] <- 1
-     #colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
      colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
      SCA
      }
 }
+
+
+# SCA <- function(P1, P2, type = "fix", data = NULL){
+#     if(!is.null(data)){
+#     P1Name <- deparse(substitute(P1))
+#     P2Name <- deparse(substitute(P2))
+#     P1 <- data[[P1Name]]
+#     P2 <- data[[P2Name]]
+#     }
+#     if(type == "random"){
+#     crosses <- ifelse(P1 == P2, 0, 1)
+#     combination <- factor( ifelse(as.character(P1) <= as.character(P2),
+#                                  paste(P1, P2, sep =""),
+#                                  paste(P2, P1, sep ="")) )
+#     Z <- model.matrix(~ combination - 1) * crosses
+#     colnames(Z) <- sub("combination", "", colnames(Z))
+#     Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+#     return(Z)
+#   } else {
+#
+#   # Matrix for SCA in heterosis model Hayman2
+#   P1 <- factor(as.character(P1)) #, levels = unique(P1))
+#   P2 <- factor(as.character(P2)) #, levels = unique(P1)) # Livelli uguali?
+#   P1c <- as.character(P1); P2c <- as.character(P2)
+#
+#   # combination
+#   tmp <- ifelse(P1c < P2c, paste(P1c, P2c, sep =":"),
+#          paste(P2c, P1c, sep = ":"))
+#   combination <- factor(tmp) #, levels = unique(tmp))
+#
+#   combLev <- NA
+#
+#   mating <- P1:P2
+#
+#   p <- length(levels(factor(c(levels(P1), levels(P2)) )))
+#   n <- length(combination)
+#
+#   selflist <- levels(factor(combination[P1c == P2c]))
+#
+#   # See whether selfs are included and find the last level for each P1
+#   levs <- sort(unique(c(levels(P1), levels(P2))))
+#   # tmp <- sapply(by(P1, P2, function(x) levels(x)), function(x) max(as.character(x)))
+#   # tmp <- ifelse(names(tmp) < tmp, paste(names(tmp), tmp, sep = ":"), paste(tmp, names(tmp), sep = ":"))
+#   tmp <- paste(levs, max(levs), sep = ":")
+#   last <- levels(factor(tmp, levels = unique(tmp)))
+#
+#   # tmp <- sapply(by(P2, P1, function(x) levels(x)), function(x) sort(as.character(x))[(length(x) - 1)])
+#   # tmp <- ifelse(names(tmp) < tmp, paste(names(tmp), tmp, sep = ":"), paste(tmp, names(tmp), sep = ":"))
+#   # lastButOne <- levels(factor(tmp, levels = unique(tmp)))
+#   #
+#   # tmp <- sapply(by(P2, P1, function(x) levels(x)), function(x) sort(as.character(x))[(length(x) - 2)])
+#   # tmp <- ifelse(names(tmp) < tmp, paste(names(tmp), tmp, sep = ":"), paste(tmp, names(tmp), sep = ":"))
+#   # lastButTwo <- levels(factor(tmp, levels = unique(tmp)))
+#
+#   levs <- levels(combination)
+#   idx1 <- c()
+#   for(i in 1:length(last)){ #Indica la posizione dell'ultimo in ogni gruppo
+#          y <- which(levs == last[i])
+#          # print(i); print(length(y))
+#          if(length(y) != 0) idx1[i] <- y else next
+#   }
+#   # idx2 <- c()
+#   # for(i in 1:length(last)){ #Indica il penultimo
+#   #         y <- which(levs == lastButOne[i])
+#   #         if(length(y) > 0) idx2[i] <- y
+#   # }
+#   #
+#   # idx2b <- c()
+#   # for(i in 1:length(last)){ #Indica il terzultimo
+#   #         y <- which(levs == lastButTwo[i])
+#   #         if(length(y) > 0) idx2b[i] <- y
+#   # }
+#
+#   idx3 <- c()
+#   for(i in 1:length(selflist)){ #Indica i selfs
+#           #i <- 2
+#           y <- which(levs == selflist[i])
+#           if(length(y) > 0) idx3[i] <- y
+#   }
+#   idx <- c(idx1, idx3)
+#   rimossi <- levs[idx]
+#   levs <- as.character(levs[-idx])
+#   rimossi <- c(rimossi, levs[length(levs)])
+#   levs <- levs[-length(levs)]
+#   SCA <- matrix(0, nrow = n, ncol = length(levs))
+#   colnames(SCA) <- paste(levs)
+#
+#   # Step 2. Insert 1s for all the levels, which are
+#   # in the SCA matrix
+#   for(i in 1:length(levs)){
+#           cond <- (combination == colnames(SCA)[i]) * 1
+#           SCA[, i] <- cond
+#     }
+#
+#   # Step 3. Insert the -1s for the last level. The last level of
+#   # Par2, within each level of Par1. The last level of Par1
+#   # requires another step
+#   for(i in 1:(length(last) - 3)){
+#     # i <- 1
+#     arrival <- last[i]
+#     tmp <- strsplit(arrival, ":")[[1]]
+#     revArrival <- paste(rev(tmp), collapse = ":")
+#     lastEl <- c(arrival, revArrival)
+#     sel <- sapply(strsplit(colnames(SCA), ":"), function(i) any(i == tmp[1]))
+#     idx <- sapply(1:length(combination), function(i) any(lastEl == mating[i]))
+#     SCA[idx, sel] <- -1
+#     SCA
+#     }
+#
+#   # Mancano le combinazioni degli ultimi 3 ibridi
+#     revParents <- function(x){
+#         tmp <- strsplit(x, ":")[[1]]
+#         paste(rev(tmp), collapse = ":")}
+#
+#     tmp <- seq(p - 2, p, 1)
+#     tmp <- as.data.frame(combn(tmp, 2))
+#     tmp <- apply(tmp, 2, function(x) paste(levels(P1)[x[1]], levels(P2)[x[2]], sep = ":"))
+#     tmp2 <- mapply(revParents, tmp)
+#
+#
+#      SCA[combination == tmp[1], ] <- -1
+#      SCA[combination == tmp2[1], ] <- -1
+#
+#      tmp3 <- strsplit(tmp[2], ":")[[1]]
+#      sel <- sapply(strsplit(colnames(SCA), ":"), function(i) !any(i == tmp3[1]))
+#      SCA[combination == tmp[2], sel] <- 1
+#      SCA[combination == tmp2[2], sel] <- 1
+#
+#      tmp3 <- strsplit(tmp[3], ":")[[1]]
+#      sel <- sapply(strsplit(colnames(SCA), ":"), function(i) !any(i == tmp3[1]))
+#      SCA[combination == tmp[3], sel] <- 1
+#      SCA[combination == tmp2[3], sel] <- 1
+#      #colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
+#      colnames(SCA) <- paste("s_", colnames(SCA), sep = "")
+#      SCA
+#      }
+# }
 
 # SCA.old <- function(P1, P2, type = "fix", data = NULL){
 #     if(!is.null(data)){
