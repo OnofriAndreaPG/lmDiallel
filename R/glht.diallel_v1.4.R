@@ -1,3 +1,12 @@
+# **************************************************************************************
+# This module creates the matrices for contrasts, to be used with the glht function
+# to retreive the full matrix of genetic effects. This is done by using the diallel.eff
+# function, that creates a 'diallelMod' object. A specific glht method for this object
+# has been defined, based on diffferent functions, depending on the diallel model object
+# Added compatibility with missing crosses in GRIFFING4 (to be extended to other models)
+# Date of last update: 20/03/2023
+# **************************************************************************************
+
 GE3r.eff <- function(obj){
   # Get the data
   # obj <- dMod2; coef(dMod2)
@@ -242,32 +251,55 @@ G4.eff <- function(obj){
     P1 <- obj$model[,2]
     P2 <- obj$model[,3]
     fct <- obj$fct
-    # Intercept
+
+  # Intercept
     temp <- matrix(0, 1, length(assign))
     X <- 1
     temp[,assign == 0] <- X
     row.names(temp) <- "Intercept"
+
+  # GCA effects
     i <- 0
     if(obj$Block == T) {i <- 1}
-    # GCA
     P1 <- factor(as.character(P1))
     P2 <- factor(as.character(P2))
     levs <- c(levels(P1), levels(P2))
     levs <- levels(factor(levs))
     levs <- factor(levs)
     temp1 <- matrix(0, length(levs), length(assign))
-    # temp3 <- temp1
-    contrasts(levs) <- "contr.sum"
-    X <- model.matrix(~levs)[,-1]
+
+    # Removed on 20/3/23 to allow for missing crosses
+    # contrasts(levs) <- "contr.sum"
+    # X <- model.matrix(~levs)[,-1]
+    # temp1[,assign == i + 1] <- X
+    # row.names(temp1) <- paste("g", levs, sep = "_")
+    # X
+
+    # edited on 20/3/23
+    X <- model.matrix(~levs - 1)
+    toRem <- max(which(levs %in% obj$chk_design$parNoMis))
+    X <- X[,-toRem] - X[,toRem]
     temp1[,assign == i + 1] <- X
     row.names(temp1) <- paste("g", levs, sep = "_")
-    # SCA
-    expl <- expand.diallel(as.character(levs), 3)
-    # X <- SCA.G3(expl[,1], expl[,2])
-    X <- SCA(expl[,1], expl[,2]) # Corrected on 2/7/21
+    # temp1
+
+    # SCA effects
+    # expl <- expand.diallel(as.character(levs), 3) # Edited on 20/3/23
+    expl <- expand.diallel(as.character(levs), 4)
+    misCros <- obj$chk_design$missingCrosses
+    if(!is.null(misCros)){
+      for(j in 1:nrow(misCros)){
+        expl <- expl[!(expl$Par1 == misCros[j,1] & expl$Par2 == misCros[j,2]),]
+      }
+    }
+    # expl
+    # X <- SCA.G3(expl[,1], expl[,2]) # Original
+    # X <- SCA(expl[,1], expl[,2]) # Corrected on 2/7/21
+    X <- SCAmis(expl[,1], expl[,2]) # Edited on 20/3/23
     temp2 <- matrix(0, length(X[,1]), length(assign))
     temp2[,assign == i + 2] <- X
     row.names(temp2) <- paste("s", "_", expl[,1], ":", expl[,2], sep = "")
+
     # rimuovere le righe senza elementi non-zero
     X <- rbind(temp, temp1, temp2)
     X <- X[apply(X, 1, function(x) !all(x==0)),]
@@ -509,7 +541,8 @@ hayman1.eff <- function(obj){
     X <- rbind(temp, temp1, temp2, temp3, temp4)
     X <- X[apply(X, 1, function(x) !all(x==0)),]
     return(X)
-  }
+}
+
 MET1.eff <- function(obj){
   Y <- obj$model[,1]
   P1 <- factor(obj$model[,2])
@@ -653,7 +686,7 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL, type = "all") {
       k <- MET2.eff(obj)
     } else if(type == "reduced"){
       k <- MET3.eff(obj)
-    }else {
+    } else {
       print("Argument type may be either 'all' or 'means' or 'reduced'")
       stop()
     }

@@ -1,8 +1,9 @@
 \name{model.matrixDiallel}
 \alias{model.matrixDiallel}
-%- Also NEED an '\alias' for EACH other topic documented here.
+\alias{model.matrixDiallel.MET}
+
 \title{
-Design matrix for Diallel model parametrisation
+Incidence matrices for Diallel model parametrisation
 }
 \description{
 \code{model.matrixDiallel} is useful to build design matrices, according to the user-defined (or default) parameterisation for \code{lm} function. It shares the same syntax of the \code{lm.diallel} function.

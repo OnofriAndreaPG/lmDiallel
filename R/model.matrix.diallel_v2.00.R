@@ -6,19 +6,20 @@ model.matrix.diallel <- function(object, ...){
 }
 
 model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
-                                 fct = NULL, data = NULL){
-  # At the beginning, it is necessary to assess the mating scheme
-  # and the presence of missing crosses. This is best done on the fct
-  # based part
+                                 fct = NULL, data = NULL,
+                                type = "nested"){
 
   if(is.null(fct)){
-    # This is a formula based output ###############
-    # This is used by one who knows what he is doing
-    X1 <- model.matrix(formula, data)
-    X <- X1[,-1]
-    attr(X, "assign") <- attr(X1, "assign")[-1]
-  } else {
-    # fct based output
+    # This is a formula based output
+    # This is used by one who knows what he is doing, and makes
+    # direct use of the functions GCA, SCA and so on
+    X <- model.matrix(formula, data)
+    # X <- X1[,-1]
+    # attr(X, "assign") <- attr(X1, "assign")[-1] - 1
+    # attr(X, "assign") <- attr(X1, "assign")[-1] - 1
+    } else {
+    # fct based output.
+    # It creates the incidence matrices for specific models
     mf <- match.call(expand.dots = FALSE) # Riprende la chiamata, con i nomi
     m <- match(c("formula", "Block", "Env", "data"), names(mf), 0L) # Trova nella chiamata la formula. m rappresenta la posizione della formula nella chiamata
     mf <- mf[c(1L, m)]
@@ -42,6 +43,7 @@ model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
     }
 
     if(is.null(Env) == T){
+      # Experiments in one environment
       n <- length(Par1)
       P1 <- factor(as.character(Par1))
       P2 <- factor(as.character(Par2))
@@ -62,345 +64,630 @@ model.matrixDiallel <- function(formula, Block = NULL, Env = NULL,
         namEffs <- c(namEffs, "Block")
       }
 
-    if(fct == "HAYMAN1"){
-      # HAYMAN1 - con tSCA #############################
-      # 6/04/2020
+      if(fct == "HAYMAN1"){
+        # HAYMAN1 - con tSCA #############################
+        # 6/04/2020
 
-      # Matrix for GCA
-      Z <- GCA(P1, P2)
+        # Matrix for GCA
+        Z <- GCA(P1, P2)
 
-      # Matrix tSCA
-      SCA <- tSCA(P1, P2)
+        # Matrix tSCA
+        SCA <- tSCA(P1, P2)
 
-      #Matrix for RGCA
-      RGCA <- RGCA(P1, P2)
+        #Matrix for RGCA
+        RGCA <- RGCA(P1, P2)
 
-      #Matrix for RSCA
-      rec <- RSCA(P1, P2)
+        #Matrix for RSCA
+        rec <- RSCA(P1, P2)
 
-      # Building matrix (0:5)
-      X <- cbind(X, Z, SCA, RGCA, rec)
-      groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
-      reps <- c(reps, length(Z[1,]), length(SCA[1,])
-                              ,length(RGCA[1,])
-                              ,length(rec[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA","tSCA", "RGCA", "RSCA",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
+        # Building incidence matrix (0:5)
+        X <- cbind(X, Z, SCA, RGCA, rec)
+        groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
+        reps <- c(reps, length(Z[1,]), length(SCA[1,])
+                                ,length(RGCA[1,])
+                                ,length(rec[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- levs
+        namEffs <- c(namEffs, "GCA","tSCA", "RGCA", "RSCA",
+                                   "Residuals")
+        attr(X, "namEff") <- namEffs
 
-    } else if(fct == "HAYMAN2"){
-      # HAYMAN2 - SCA decomposta ###########
-      # 23/03/2020
+      } else if(fct == "HAYMAN2"){
+          # HAYMAN2 - SCA decomposta ###########
+          # 23/03/2020
 
-      # Matrix for crosses
-      crM <- MDD(P1, P2)
+          # Matrix for crosses
+          crM <- MDD(P1, P2)
 
-      # Matrix for GCA
-      Z <- GCA(P1, P2)
-      # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(Z) <- c(nams)
+          # Matrix for GCA
+          Z <- GCA(P1, P2)
+          # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(Z) <- c(nams)
 
-      # Matrix for h.i
-      H <- DD(P1, P2)
+          # Matrix for h.i
+          H <- DD(P1, P2)
 
-      # Matrix for sca
-      SCA <- SCA(P1, P2)
-      #colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+          # Matrix for sca
+          SCA <- SCA(P1, P2)
+          #colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
-      # Matrix for RGCA
-      RGCA <- RGCA(P1, P2)
-      # nams <- paste("rgca_", levels(P1)[1:length(levels(P1))-1], sep="")
-      # colnames(RGCA) <- c(nams)
+          # Matrix for RGCA
+          RGCA <- RGCA(P1, P2)
+          # nams <- paste("rgca_", levels(P1)[1:length(levels(P1))-1], sep="")
+          # colnames(RGCA) <- c(nams)
 
-      # Matrix for RSCA
-      rec <- RSCA(P1, P2)
-      # colnames(rec) <- paste("rsca_", colnames(rec), sep = "")
+          # Matrix for RSCA
+          rec <- RSCA(P1, P2)
+          # colnames(rec) <- paste("rsca_", colnames(rec), sep = "")
 
-      # Building incidence matrix (0:7)
-      X <- cbind(X, crM, Z, H, SCA, RGCA, rec)
-      groups <- c(groups, seq(nGroups+1, nGroups+6, 1))
-      reps <- c(reps, 1, length(Z[1,]), length(H[1,])
-                              ,length(SCA[1,])
-                              ,length(RGCA[1,])
-                              ,length(rec[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "MDD", "GCA", "DD", "SCA",
-                   "RGCA", "RSCA", "Residuals")
-      attr(X, "namEff") <- namEffs
+          # Building incidence matrix (0:7)
+          X <- cbind(X, crM, Z, H, SCA, RGCA, rec)
+          groups <- c(groups, seq(nGroups+1, nGroups+6, 1))
+          reps <- c(reps, 1, length(Z[1,]), length(H[1,])
+                                  ,length(SCA[1,])
+                                  ,length(RGCA[1,])
+                                  ,length(rec[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "MDD", "GCA", "DD", "SCA",
+                       "RGCA", "RSCA", "Residuals")
+          attr(X, "namEff") <- namEffs
 
-      } else if(fct == "GRIFFING1"){
+          } else if(fct == "GRIFFING1"){
 
-      # GRIFFING 1 - Reciprocal effects #########################################
-      #B <- matBlock(~Block)
+          # GRIFFING 1 - Reciprocal effects #########################################
+          #B <- matBlock(~Block)
 
-      Z <- GCA(P1, P2)
-      # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(Z) <- c(nams)
+          Z <- GCA(P1, P2)
+          # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(Z) <- c(nams)
 
-      SCA <- tSCA(P1, P2)
-      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+          SCA <- tSCA(P1, P2)
+          # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
-      rec <- REC(P1, P2)
-      # colnames(rec) <- paste("rec_", colnames(rec), sep = "")
+          rec <- REC(P1, P2)
+          # colnames(rec) <- paste("rec_", colnames(rec), sep = "")
 
-      # Building incidence matrix (0:4)
-      X <- cbind(X, Z, SCA, rec)
-      groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
-      reps <- c(reps, length(Z[1,]),
-                      length(SCA[1,])
+          # Building incidence matrix (0:4)
+          X <- cbind(X, Z, SCA, rec)
+          groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
+          reps <- c(reps, length(Z[1,]),
+                          length(SCA[1,])
+                        , length(rec[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "GCA", "tSCA", "Reciprocals",
+                                     "Residuals")
+          attr(X, "namEff") <- namEffs
+
+        } else if(fct == "GRIFFING2"){
+          # GRIFFING 2 - No reciprocals #######################
+          # 23/03/2020
+
+          #B <- matBlock(~Block)
+
+          Z <- GCA(P1, P2)
+          # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(Z) <- c(nams)
+          SCA <- tSCA(P1, P2)
+          # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+
+          # Building incidence matrix (0:3)
+          X <- cbind(X, Z, SCA)
+          groups <- c(groups, seq(nGroups+1, nGroups+2, 1))
+          reps <- c(reps, length(Z[1,]),
+                          length(SCA[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "GCA", "tSCA",
+                                     "Residuals")
+          attr(X, "namEff") <- namEffs
+        } else if(fct == "GRIFFING3"){
+          # GRIFFING 3 - Reciprocal effects, no selfs ###################
+          Z <- GCA(P1, P2)
+          # SCA <- SCA.G3(P1, P2)
+          SCA <- SCA(P1, P2) # Corrected on 1/7/21
+          # rec <- REC.G3(P1, P2)
+          rec <- REC(P1, P2) # Corrected on 2/3/21
+          X <- cbind(X, Z, SCA, rec)
+          groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
+          reps <- c(reps, length(Z[1,]),
+                    length(SCA[1,])
                     , length(rec[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "tSCA", "Reciprocals",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "GCA", "SCA", "Reciprocals",
+                       "Residuals")
+          attr(X, "namEff") <- namEffs
 
-    } else if(fct == "GRIFFING2"){
-      # GRIFFING 2 - No reciprocals #######################
-      # 23/03/2020
+        } else if(fct == "GRIFFING4"){
+          # GRIFFING 4 - No reciprocals, no selfs #########
+          # Z <- GCA(P1, P2) # Original
+          Z <- GCAmis(P1, P2) # Edited on 20/03/23
+          # SCA <- SCA.G3(P1, P2) # Original
+          # SCA <- SCA(P1, P2) # Edited on 1/7/21
+          SCA <- SCAmis(P1, P2) # Edited on 20/03/23
+          X <- cbind(X, Z, SCA)
+          groups <- c(groups, seq(nGroups+1, nGroups+2, 1))
+          reps <- c(reps, length(Z[1,]),
+                    length(SCA[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "GCA", "SCA",
+                       "Residuals")
+          attr(X, "namEff") <- namEffs
 
-      #B <- matBlock(~Block)
+        } else if(fct == "GE2"){
+          # GE2 - Senza reciproci ####################
+          # 23/03/2020
+          # B <- matBlock(~Block)
 
-      Z <- GCA(P1, P2)
-      # nams <- paste("gca_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(Z) <- c(nams)
-      SCA <- tSCA(P1, P2)
-      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+          # Matrix for bar_h
+          crM <- H.BAR(P1, P2)
+          # colnames(crM) <- "h.bar"
 
-      # Building incidence matrix (0:3)
-      X <- cbind(X, Z, SCA)
-      groups <- c(groups, seq(nGroups+1, nGroups+2, 1))
-      reps <- c(reps, length(Z[1,]),
-                      length(SCA[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "tSCA",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
-    } else if(fct == "GRIFFING3"){
+          # Matrix for nu.i
+          Z <- VEi(P1, P2)
+          # nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(Z) <- c(nams)
 
-      # GRIFFING 3 - Reciprocal effects, no selfs ###################
-      Z <- GCA(P1, P2)
-      # SCA <- SCA.G3(P1, P2)
-      SCA <- SCA(P1, P2) # Corrected on 1/7/21
-      # rec <- REC.G3(P1, P2)
-      rec <- REC(P1, P2) # Corrected on 2/3/21
-      X <- cbind(X, Z, SCA, rec)
-      groups <- c(groups, seq(nGroups+1, nGroups+3, 1))
-      reps <- c(reps, length(Z[1,]),
-                length(SCA[1,])
-                , length(rec[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "tSCA", "Reciprocals",
-                   "Residuals")
-      attr(X, "namEff") <- namEffs
-
-    } else if(fct == "GRIFFING4"){
-
-      # GRIFFING 4 - No reciprocals, no selfs #########
-      Z <- GCA(P1, P2)
-      # SCA <- SCA.G3(P1, P2)
-      SCA <- SCA(P1, P2) # Corrected on 1/7/21
-      X <- cbind(X, Z, SCA)
-      groups <- c(groups, seq(nGroups+1, nGroups+2, 1))
-      reps <- c(reps, length(Z[1,]),
-                length(SCA[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "GCA", "SCA",
-                   "Residuals")
-      attr(X, "namEff") <- namEffs
-
-    } else if(fct == "GE2"){
-      # GE2 - Senza reciproci ####################
-      # 23/03/2020
-      # B <- matBlock(~Block)
-
-      # Matrix for bar_h
-      crM <- H.BAR(P1, P2)
-      # colnames(crM) <- "h.bar"
-
-      # Matrix for nu.i
-      Z <- VEi(P1, P2)
-      # nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(Z) <- c(nams)
-
-      # Matrix for h.i
-      H <- Hi(P1, P2)
+          # Matrix for h.i
+          H <- Hi(P1, P2)
 
 
-      # Matrix for sca
-      SCA <- SCA(P1, P2)
-      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+          # Matrix for sca
+          SCA <- SCA(P1, P2)
+          # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
-      # Building incidence matrix (0:5)
-      X <- cbind(X, crM, Z, H, SCA)
-      groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
-      reps <- c(reps,  1 ,length(Z[1,])
-                         ,length(H[1, ])
-                         ,length(SCA[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "h.bar", "Variety", "h.i", "SCA",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
+          # Building incidence matrix (0:5)
+          X <- cbind(X, crM, Z, H, SCA)
+          groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
+          reps <- c(reps,  1 ,length(Z[1,])
+                             ,length(H[1, ])
+                             ,length(SCA[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "h.bar", "Variety", "h.i", "SCA",
+                                     "Residuals")
+          attr(X, "namEff") <- namEffs
 
-    } else if(fct == "GE2r"){
-      # GE2r - With reciprocals ####################
-      # 23/03/2020
+        } else if(fct == "GE2r"){
+          # GE2r - With reciprocals ####################
+          # 23/03/2020
 
-      #B <- matBlock(~Block)
+          #B <- matBlock(~Block)
 
-      # Matrix for bar_h
-      crM <- H.BAR(P1, P2)
-      # colnames(crM) <- "h.bar"
+          # Matrix for bar_h
+          crM <- H.BAR(P1, P2)
+          # colnames(crM) <- "h.bar"
 
-      # # Matrix for crosses
-      # slM <- H.BAR(crosses)
-      # colnames(slM) <- "Selfs"
+          # # Matrix for crosses
+          # slM <- H.BAR(crosses)
+          # colnames(slM) <- "Selfs"
 
-      Z <- VEi(P1, P2)
-      # nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(Z) <- c(nams)
+          Z <- VEi(P1, P2)
+          # nams <- paste("ve_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(Z) <- c(nams)
 
-      H <- Hi(P1, P2)
-      # nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(H) <- c(nams)
+          H <- Hi(P1, P2)
+          # nams <- paste("h_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(H) <- c(nams)
 
-      # Matrix for sca
-      SCA <- SCA(P1, P2)
-      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+          # Matrix for sca
+          SCA <- SCA(P1, P2)
+          # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
-      rec <- REC(P1, P2)
-      # colnames(rec) <- paste("rec_", colnames(rec), sep = "")
+          rec <- REC(P1, P2)
+          # colnames(rec) <- paste("rec_", colnames(rec), sep = "")
 
-      # Building incidence matrix (0:6)
-      X <- cbind(X, crM, Z, H, SCA, rec)
-      groups <- c(groups, seq(nGroups+1, nGroups+5, 1))
-      reps <- c(reps,  1 ,length(Z[1,])
-                         ,length(H[1, ])
-                         ,length(SCA[1,]),
-                          length(rec[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "h.bar", "Variety", "h.i", "SCA", "Reciprocals",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
+          # Building incidence matrix (0:6)
+          X <- cbind(X, crM, Z, H, SCA, rec)
+          groups <- c(groups, seq(nGroups+1, nGroups+5, 1))
+          reps <- c(reps,  1 ,length(Z[1,])
+                             ,length(H[1, ])
+                             ,length(SCA[1,]),
+                              length(rec[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "h.bar", "Variety", "h.i", "SCA", "Reciprocals",
+                                     "Residuals")
+          attr(X, "namEff") <- namEffs
 
-    } else if(fct == "GE3"){
-      # GE3 - Senza reciproci ###############################################
-      # 23/03/2020
-      crM <- H.BAR(P1, P2)
-      H <- SP(P1, P2)
-      Z <- GCAC(P1, P2)
-      SCA <- SCA(P1, P2)
+        } else if(fct == "GE3"){
+          # GE3 - Senza reciproci ###############################################
+          # 23/03/2020
+          crM <- H.BAR(P1, P2)
+          H <- SP(P1, P2)
+          Z <- GCAC(P1, P2)
+          SCA <- SCA(P1, P2)
 
-      # Building incidence matrix (0:5)
-      X <- cbind(X, crM, H, Z, SCA)
-      groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
-      reps <- c(reps,  1 ,length(H[1,])
-                         ,length(Z[1, ])
-                         ,length(SCA[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "h.bar",
-                             "Selfed par.",
-                             "Varieties", "SCA",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
+          # Building incidence matrix (0:5)
+          X <- cbind(X, crM, H, Z, SCA)
+          groups <- c(groups, seq(nGroups+1, nGroups+4, 1))
+          reps <- c(reps,  1 ,length(H[1,])
+                             ,length(Z[1, ])
+                             ,length(SCA[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "h.bar",
+                                 "Selfed parents",
+                       "gcac", "SCA", "Residuals")
+          attr(X, "namEff") <- namEffs
 
-    } else if(fct == "GE3r"){
-      # GE3r - Con reciproci ###############################################
-      # 23/03/2020
+        } else if(fct == "GE3r"){
+          # GE3r - Con reciproci ###############################################
+          # 23/03/2020
 
-      # Matrix for crosses
-      #crM <- matrix(crosses, n, 1)
-      crM <- H.BAR(P1, P2)
-      # colnames(crM) <- "h.bar"
+          # Matrix for crosses
+          #crM <- matrix(crosses, n, 1)
+          crM <- H.BAR(P1, P2)
+          # colnames(crM) <- "h.bar"
 
-      Z <- GCAC(P1, P2)
-      # nams <- paste("gcac_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(Z) <- c(nams)
+          H <- SP(P1, P2)
+          # nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(H) <- c(nams)
 
-      H <- SP(P1, P2)
-      # nams <- paste("sp_", levels(P1)[1:(length(levels(P1))-1)], sep="")
-      # colnames(H) <- c(nams)
+          Z <- GCAC(P1, P2)
+          # nams <- paste("gcac_", levels(P1)[1:(length(levels(P1))-1)], sep="")
+          # colnames(Z) <- c(nams)
 
-      # Matrix for sca
-      SCA <- SCA(P1, P2)
-      # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
+          # Matrix for sca
+          SCA <- SCA(P1, P2)
+          # colnames(SCA) <- paste("sca_", colnames(SCA), sep = "")
 
-      rec <- REC(P1, P2)
-      #  colnames(rec) <- paste("rec_", colnames(rec), sep = "")
+          rec <- REC(P1, P2)
+          #  colnames(rec) <- paste("rec_", colnames(rec), sep = "")
 
-      # Building incidence matrix (0:6)
-      X <- cbind(X, crM, Z, H, SCA, rec)
-      groups <- c(groups, seq(nGroups+1, nGroups+5, 1))
-      reps <- c(reps,  1 ,length(Z[1,])
-                         ,length(H[1, ])
-                         ,length(SCA[1,]),
-                length(rec[1,]))
-      levs <- rep(groups, reps)
-      attr(X, "assign") <- levs
-      namEffs <- c(namEffs, "h.bar",
-                             "gcac",
-                             "Selfed par.", "SCA", "Reciprocals",
-                                 "Residuals")
-      attr(X, "namEff") <- namEffs
+          # Building incidence matrix (0:6)
+          X <- cbind(X, crM, H, Z, SCA, rec)
+          groups <- c(groups, seq(nGroups+1, nGroups+5, 1))
+          reps <- c(reps,  1 ,length(H[1,])
+                             ,length(Z[1, ])
+                             ,length(SCA[1,]),
+                    length(rec[1,]))
+          levs <- rep(groups, reps)
+          attr(X, "assign") <- levs
+          namEffs <- c(namEffs, "h.bar",
+                                 "Selfed parents", "gcac",
+                                 "SCA", "Reciprocals",
+                                     "Residuals")
+          attr(X, "namEff") <- namEffs
 
-    }else{
-         stop("Not yet implemented")
+        }else{
+             stop("Model not yet implemented")
+        }
+      } else {
+        # GE Data ####################################
+        # Creazione matrice incidenza
+        # effetti genetici can be crossed or nested
+        # Nested is the rule for fitting, but crossed are
+        # necessary for ANOVA
+        X <- model.matrixDiallel.MET(Par1, Par2, Block, Env ,
+                                    fct, type = type)
+
       }
-  } else {
-    # GE Data ####################################
-    # Creazione matrice incidenza (per ogni ambiente)
-    # Da ogni matrice viene rimossa l'intercetta
-    # Le matrici sono impilate
-    Env <- factor(Env)
-    if(!is.null(Block)){
-      Block <- factor(Block)
-      datasetS <- data.frame(Id = 1:length(Par1), Env, Block, Par1, Par2)
-      datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
-                   datasetS$Par2, datasetS$Block), ]
-      matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
-              model.matrixDiallel(~ df$Par1 + df$Par2, df$Block,
-                  fct = fct)})
-    } else {
-      datasetS <- data.frame(Id = 1:length(Par1), Env, Par1, Par2)
-      datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
-                   datasetS$Par2), ]
-      matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
-              model.matrixDiallel(~ df$Par1 + df$Par2, fct = fct)})
     }
-
-    mats <- matsOr
-    mats <- lapply(mats, function(x) x[, -1])
-    for(i in 1:length(levels(datasetS$Env))) colnames(mats[[i]]) <- paste(colnames(mats[[i]]), names(mats)[i], sep = ":")
-    colNames <- unlist(lapply(mats, colnames))
-    mats <- blockMatrixDiagonal(mats)
-    colnames(mats) <- colNames
-    mats2 <- model.matrix(~ Env - 1, data = datasetS)
-    X <- cbind(mats2, mats)
-    X <- X[order(datasetS$Id), ]
-
-    # Creating the submatrices
-    asgnList <- lapply(matsOr, function(x) attr(x, "assign"))
-    asgnList <- lapply(asgnList, function(x) unlist(x)[-1])
-    addVal <- max(unlist(asgnList[1]))
-    asgn <- c(unlist(asgnList[1]),unlist(lapply(asgnList[-1], function(x) unlist(x) + addVal)) )
-    asgn <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn))
-    attr(X, "assign") <- asgn
-    attr(X, "namEff") <- as.character( unlist( lapply(matsOr, function(x) attr(x, "namEff"))[1] ) )
-    # asgn2 <- c(unlist(asgnList[1]),unlist(lapply(asgnList[-1], function(x) unlist(x))) )
-    # asgn2 <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn2))
-    # attr(X, "assign2") <- asgn2
-  }}
   return(X)
 }
+
+model.matrixDiallel.MET <- function(Par1, Par2, Block, Env ,
+                                    fct, type = "crossed"){
+
+  if(type != "crossed" & type != "nested")
+    stop("'Incidence matrices 'Type' can only be 'nested' ore 'crossed'")
+
+  if(type == "crossed"){
+      # Effetti genetici crossed
+      n <- length(Par1)
+      P1 <- factor(as.character(Par1))
+      P2 <- factor(as.character(Par2))
+      nGroups <- 0
+      groups <- c(nGroups)
+      Env <- factor(Env)
+      contrasts(Env) <- c("contr.sum")
+      EnvMat <- model.matrix(~ Env)
+
+      if(!is.null(Block)) {
+        Block <- factor(Block)
+        contrasts(Block) <- c("contr.sum")
+        X <- model.matrix(~ Env/Block)
+        asgn1 <- attr(X, "assign")
+        nGroups <- 2
+        groups <- 0:2
+        namEffs <- c("Intercept", "Env", "Env/Block")
+      } else {
+        X <- EnvMat
+        asgn1 <- attr(X, "assign")
+        nGroups <- 1
+        groups <- 0:1
+        namEffs <- c("Intercept", "Env")
+      }
+      EnvMat <- as.matrix(EnvMat[,-1])
+
+      if(fct == "HAYMAN1"){
+        # HAYMAN1 - con tSCA #############################
+        # 6/04/2020
+        Z <- GCA(P1, P2)
+        SCA <- tSCA(P1, P2)
+        RGCA <- RGCA(P1, P2)
+        rec <- RSCA(P1, P2)
+        Zenv <- int.matrix(Z, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        RGCAenv <- int.matrix(RGCA, EnvMat)
+        RSCAenv <- int.matrix(rec, EnvMat)
+
+        X <- cbind(X, Z, SCA, RGCA, rec, Zenv, SCAenv, RGCAenv, RSCAenv)
+        groups <- c(seq(nGroups+1, nGroups+8, 1))
+        reps <- c(length(Z[1,]), length(SCA[1,])
+                                ,length(RGCA[1,])
+                                ,length(rec[1,])
+                                ,length(Zenv[1,])
+                                ,length(SCAenv[1,])
+                  ,length(RGCAenv[1,])
+                  ,length(RSCAenv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "GCA","tSCA", "RGCA", "RSCA",
+                              "GCA:Env", "tSCA:Env", "RGCA:Env", "RSCA:Env",
+                                   "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "HAYMAN2"){
+        # HAYMAN2 - SCA decomposta ###########
+        # 23/03/2020
+       crM <- MDD(P1, P2)
+       Z <- GCA(P1, P2)
+       H <- DD(P1, P2)
+       SCA <- SCA(P1, P2)
+       RGCA <- RGCA(P1, P2)
+       rec <- RSCA(P1, P2)
+       crMenv <- int.matrix(crM, EnvMat)
+       Zenv <- int.matrix(Z, EnvMat)
+       Henv <- int.matrix(H, EnvMat)
+       SCAenv <- int.matrix(SCA, EnvMat)
+       RGCAenv <- int.matrix(RGCA, EnvMat)
+       RSCAenv <- int.matrix(rec, EnvMat)
+
+       # Building incidence matrix (0:7)
+       X <- cbind(X, crM, Z, H, SCA, RGCA, rec, crMenv, Zenv, Henv,
+                  SCAenv, RGCAenv, RSCAenv)
+       groups <- c(seq(nGroups+1, nGroups+12, 1))
+       reps <- c(length(crM[1,]), length(Z[1,]),
+                 length(H[1,]), length(SCA[1,]),
+                 length(RGCA[1,]), length(rec[1,]),
+                 length(crMenv[1,]), length(Zenv[1,]),
+                 length(Henv[1,]), length(SCAenv[1,]),
+                 length(RGCAenv[1,]),length(RSCAenv[1,]))
+       levs <- rep(groups, reps)
+       attr(X, "assign") <- c(asgn1, levs)
+       namEffs <- c(namEffs, "MDD", "GCA", "DD", "SCA",
+                     "RGCA", "RSCA", "MDD:Env", "GCA:Env", "DD:Env",
+                     "SCA:Env", "RGCA:Env", "RSCA:Env", "Residuals")
+       attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GRIFFING1"){
+        # GRIFFING 1 - Reciprocal effects #######################
+        Z <- GCA(P1, P2)
+        SCA <- tSCA(P1, P2)
+        rec <- REC(P1, P2)
+        Zenv <- int.matrix(Z, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        recEnv <- int.matrix(rec, EnvMat)
+
+        X <- cbind(X, Z, SCA, rec, Zenv, SCAenv, recEnv)
+        groups <- c(seq(nGroups+1, nGroups+6, 1))
+        reps <- c(length(Z[1,]), length(SCA[1,]),
+                  length(rec[1,]), length(Zenv[1,]),
+                  length(SCAenv[1,]), length(recEnv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "GCA", "tSCA", "Reciprocals",
+                     "GCA:Env", "tSCA:Env", "Reciprocals:Env",
+                                   "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GRIFFING2"){
+        # GRIFFING 2 - No reciprocals #######################
+        # 23/03/2020
+        Z <- GCA(P1, P2)
+        SCA <- tSCA(P1, P2)
+        Zenv <- int.matrix(Z, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        X <- cbind(X, Z, SCA, Zenv, SCAenv)
+        groups <- c(seq(nGroups+1, nGroups+4, 1))
+        reps <- c(length(Z[1,]), length(SCA[1,]),
+                  length(Zenv[1,]), length(SCAenv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "GCA", "tSCA", "GCA:Env", "tSCA:Env",
+                                   "Residuals")
+        attr(X, "namEff") <- namEffs
+      } else if(fct == "GRIFFING3"){
+        # GRIFFING 3 - Reciprocal effects, no selfs ###################
+        Z <- GCA(P1, P2)
+        SCA <- SCA(P1, P2) # Corrected on 1/7/21
+        rec <- REC(P1, P2) # Corrected on 2/3/21
+        Zenv <- int.matrix(Z, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        recEnv <- int.matrix(rec, EnvMat)
+        X <- cbind(X, Z, SCA, rec, Zenv, SCAenv, recEnv)
+        groups <- c(seq(nGroups+1, nGroups+6, 1))
+        reps <- c(length(Z[1,]), length(SCA[1,]), length(rec[1,]),
+                  length(Zenv[1,]), length(SCAenv[1,]), length(recEnv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "GCA", "SCA", "Reciprocals",
+                     "GCA:Env", "SCA:Env", "Reciprocals:Env",
+                     "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GRIFFING4"){
+        # GRIFFING 4 - No reciprocals, no selfs #########
+        Z <- GCAmis(P1, P2) # Edited on 20/03/23
+        SCA <- SCAmis(P1, P2) # Edited on 20/03/23
+        Zenv <- int.matrix(Z, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        X <- cbind(X, Z, SCA, Zenv, SCAenv)
+        groups <- c(seq(nGroups+1, nGroups+4, 1))
+        reps <- c(length(Z[1,]), length(SCA[1,]),
+                  length(Zenv[1,]), length(SCAenv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "GCA", "SCA", "GCA:Env", "SCA:Env",
+                     "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GE2"){
+        # GE2 - Senza reciproci ####################
+        # 23/03/2020
+        crM <- H.BAR(P1, P2)
+        Z <- VEi(P1, P2)
+        H <- Hi(P1, P2)
+        SCA <- SCA(P1, P2)
+        crMenv <- int.matrix(crM, EnvMat)
+        Zenv <- int.matrix(Z, EnvMat)
+        Henv <- int.matrix(H, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        X <- cbind(X, crM, Z, H, SCA, crMenv, Zenv, Henv, SCAenv)
+        groups <- c(seq(nGroups+1, nGroups+8, 1))
+        reps <- c(1, length(Z[1,]) ,length(H[1, ]),length(SCA[1,]),
+                  length(crMenv[1,]) ,length(Zenv[1,]),
+                  length(Henv[1, ]),length(SCAenv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "h.bar", "Variety", "h.i", "SCA",
+                     "h.bar:Env", "Variety:Env", "h.i:Env", "SCA:Env",
+                                   "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GE2r"){
+        # GE2r - With reciprocals ####################
+        # 23/03/2020
+        crM <- H.BAR(P1, P2)
+        Z <- VEi(P1, P2)
+        H <- Hi(P1, P2)
+        SCA <- SCA(P1, P2)
+        rec <- REC(P1, P2)
+        crMenv <- int.matrix(crM, EnvMat)
+        Zenv <- int.matrix(Z, EnvMat)
+        Henv <- int.matrix(H, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        recEnv <- int.matrix(rec, EnvMat)
+        X <- cbind(X, crM, Z, H, SCA, rec, crMenv, Zenv, Henv, SCAenv,
+                   recEnv)
+        groups <- c(seq(nGroups+1, nGroups+10, 1))
+        reps <- c(1, length(Z[1,]) ,length(H[1, ]),length(SCA[1,]),
+                  length(rec[1,]),
+                  length(crMenv[1,]) ,length(Zenv[1,]),
+                  length(Henv[1, ]),length(SCAenv[1,]),
+                  length(recEnv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "h.bar", "Variety", "h.i", "SCA", "Reciprocal",
+                     "h.bar:Env", "Variety:Env", "h.i:Env", "SCA:Env",
+                     "Reciprocal:Env", "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GE3"){
+        # GE3 - Senza reciproci ##############################
+        # 23/03/2020
+        crM <- H.BAR(P1, P2)
+        H <- SP(P1, P2)
+        Z <- GCAC(P1, P2)
+        SCA <- SCA(P1, P2)
+        crMenv <- int.matrix(crM, EnvMat)
+        Henv <- int.matrix(H, EnvMat)
+        Zenv <- int.matrix(Z, EnvMat)
+        SCAenv <- int.matrix(SCA, EnvMat)
+        X <- cbind(X, crM, H, Z, SCA, crMenv, Henv, Zenv, SCAenv)
+        groups <- c(seq(nGroups+1, nGroups+8, 1))
+        reps <- c(1 ,length(H[1,]), length(Z[1, ]), length(SCA[1,]),
+                  length(crMenv[1,]), length(Henv[1,]),
+                  length(Zenv[1, ]), length(SCAenv[1,]))
+        levs <- rep(groups, reps)
+        attr(X, "assign") <- c(asgn1, levs)
+        namEffs <- c(namEffs, "h.bar", "Selfed parents", "gcac", "SCA",
+                     "h.bar:Env", "Selfed parents:Env", "gcac:Env",
+                     "SCA:Env", "Residuals")
+        attr(X, "namEff") <- namEffs
+
+      } else if(fct == "GE3r"){
+      # GE3r - Con reciproci ###############################################
+      # 23/03/2020
+      crM <- H.BAR(P1, P2)
+      H <- SP(P1, P2)
+      Z <- GCAC(P1, P2)
+      SCA <- SCA(P1, P2)
+      rec <- REC(P1, P2)
+      crMenv <- int.matrix(crM, EnvMat)
+      Henv <- int.matrix(H, EnvMat)
+      Zenv <- int.matrix(Z, EnvMat)
+      SCAenv <- int.matrix(SCA, EnvMat)
+      recEnv <- int.matrix(rec, EnvMat)
+      X <- cbind(X, crM, H, Z, SCA, rec,
+                 crMenv, Henv, Zenv, SCAenv, recEnv)
+      groups <- c(seq(nGroups+1, nGroups+10, 1))
+      reps <- c(1, length(H[1,]), length(Z[1, ]), length(SCA[1,]),
+                length(rec[1,]),
+                length(crMenv[1,]), length(Henv[1,]),
+                length(Zenv[1, ]), length(SCAenv[1,]),
+                length(recEnv[1,]))
+      levs <- rep(groups, reps)
+      attr(X, "assign") <- c(asgn1, levs)
+      namEffs <- c(namEffs, "h.bar", "Selfed parents", "gcac", "SCA",
+                   "Reciprocal",
+                   "h.bar:Env", "Selfed parents:Env", "gcac:Env",
+                   "SCA:Env", "Reciprocal:Env", "Residuals")
+      attr(X, "namEff") <- namEffs
+
+      }else{
+        stop("Model not yet implemented")
+      }
+      } else {
+      # Effetti genetici nested (normal)
+      # Par1 <- P1
+      # Par2 <- P2
+      Env <- factor(Env)
+      if(!is.null(Block)){
+        Block <- factor(Block)
+        datasetS <- data.frame(Id = 1:length(Par1), Env, Block, Par1, Par2)
+        datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
+                     datasetS$Par2, datasetS$Block), ]
+        matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
+                model.matrixDiallel(~ df$Par1 + df$Par2, df$Block,
+                    fct = fct)})
+      } else {
+        datasetS <- data.frame(Id = 1:length(Par1), Env, Par1, Par2)
+        datasetS <- datasetS[order(datasetS$Env, datasetS$Par1,
+                     datasetS$Par2), ]
+        matsOr <- plyr::dlply(datasetS, c("Env"), function(df){
+                model.matrixDiallel(~ df$Par1 + df$Par2, fct = fct)})
+      }
+
+      mats <- matsOr
+      mats <- lapply(mats, function(x) x[, -1])
+      for(i in 1:length(levels(datasetS$Env))) colnames(mats[[i]]) <- paste(colnames(mats[[i]]), names(mats)[i], sep = ":")
+      colNames <- unlist(lapply(mats, colnames))
+      mats <- blockMatrixDiagonal(mats)
+      colnames(mats) <- colNames
+      mats2 <- model.matrix(~ Env - 1, data = datasetS)
+      X <- cbind(mats2, mats)
+      X <- X[order(datasetS$Id), ]
+
+      # Creating the submatrices
+      asgnList <- lapply(matsOr, function(x) attr(x, "assign"))
+      asgnList <- lapply(asgnList, function(x) unlist(x)[-1])
+      addVal <- max(unlist(asgnList[1]))
+      asgn <- c(unlist(asgnList[1]),unlist(lapply(asgnList[-1], function(x) unlist(x) + addVal)) )
+      asgn <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn))
+      attr(X, "assign") <- asgn
+      attr(X, "namEff") <- as.character( unlist( lapply(matsOr, function(x) attr(x, "namEff"))[1] ) )
+      # asgn2 <- c(unlist(asgnList[1]),unlist(lapply(asgnList[-1], function(x) unlist(x))) )
+      # asgn2 <- as.numeric(c(rep(0, length(levels(datasetS$Env))), asgn2))
+      # attr(X, "assign2") <- asgn2
+      }
+  return(X)
+  }
 
 blockMatrixDiagonal<-function(matList){
   dimensionsRow <- sapply(matList, FUN=function(x) dim(x)[1])
@@ -1539,5 +1826,155 @@ DD <- function(P1, P2, type = "fix", data = NULL){
   nams <- paste("d_", levels(P1)[1:(length(levels(P1))-1)], sep="")
   colnames(H) <- c(nams)
   H
+}
+
+GCAmis <- function(P1, P2, type = "fix", data = NULL){
+  # This is modified to work with mating design 4
+  # in case of missing crosses, but it is supposed
+  # to work always (to be tested)
+  # Edited on 18/3/2023
+  if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
+  if(type == "random"){
+    Z <- sommer::overlay(P1, P2, sparse = F)
+  } else {
+    # tmp <- data.frame(P2, P1)
+    # arrange(tmp, P1)
+    P1 <- factor(as.character(P1))
+    P2 <- factor(as.character(P2))
+    levs <- c(levels(P1), levels(P2))
+    levs <- levels(factor(levs, levels = unique(levs)))
+    Z1n <- factor(P1, levels = levs, ordered = T)
+    Z2n <- factor(P2, levels = levs)
+    contrasts(Z1n) <- c("contr.sum")
+    contrasts(Z2n) <- c("contr.sum")
+
+    # Da qui cambia in caso di missing crosses
+    Z1 <- model.matrix(~ Z1n - 1)
+    Z2 <- model.matrix(~ Z2n - 1)
+    Z <- (Z1 + Z2)
+    nams <- paste("g_", levs[1:(length(levs))], sep="")
+    colnames(Z) <- c(nams)
+    tab <- checkScheme(P1, P2)
+
+    # Individua quali parents non hanno missing crosses
+    # Edited on 18/3/2023
+    misCros <- nams[unique(as.vector(tab$missingCrosses))]
+    if(!is.null(misCros)){
+      # misCros <- paste("g_", misCros, sep ="")
+      sel <- !(nams %in% misCros)
+      wsel <- max(which(sel == TRUE))
+      sel <- rep(TRUE, length(nams))
+      sel[wsel] <- FALSE
+    } else {
+      sel <- rep(TRUE, length(nams))
+      sel[length(sel)] <- FALSE
+    }
+    # tmp1 <- names(which(apply(tab$tab, 1, sum, na.rm = T) * apply(tab$tab, 2, sum, na.rm = T) == length(levs) - 1))
+    # tmp1 <- tmp1[length(tmp1)]
+    # tmp1 <- paste("g_", tmp1, sep = "")
+    # sel <- colnames(Z) != tmp1
+    # if(all(sel == FALSE)) sel[length(sel)] <- TRUE
+    # Z[,!sel] == 1
+    sel
+    Z <- Z[,sel] - Z[,!sel]
+  }
+  Z
+}
+
+SCAmis <- function(P1, P2, type = "fix", data = NULL){
+  # This is modified to work with mating design 4
+  # in case of missing crosses, but it is supposed
+  # to work always (to be tested)
+  # Edited on 18/3/2023
+  if(!is.null(data)){
+    P1Name <- deparse(substitute(P1))
+    P2Name <- deparse(substitute(P2))
+    P1 <- data[[P1Name]]
+    P2 <- data[[P2Name]]
+  }
+  if(type == "random"){
+    crosses <- ifelse(P1 == P2, 0, 1)
+    combination <- factor( ifelse(as.character(P1) <= as.character(P2),
+                                  paste(P1, P2, sep =""),
+                                  paste(P2, P1, sep ="")) )
+    Z <- model.matrix(~ combination - 1) * crosses
+    colnames(Z) <- sub("combination", "", colnames(Z))
+    Z <- Z[, apply(Z, 2, function(x) !all(x==0))]
+    return(Z)
+  } else {
+
+    # It is also used where the selfs are not includede
+    P1 <- factor(as.character(P1)) #, levels = unique(P1))
+    P2 <- factor(as.character(P2)) #, levels = unique(P1)) # Livelli uguali?
+    P1c <- as.character(P1); P2c <- as.character(P2)
+
+    # create the combination levels
+    tmp <- ifelse(P1c < P2c, paste(P1c, P2c, sep =":"),
+                  paste(P2c, P1c, sep = ":"))
+    combination <- factor(tmp) #, levels = unique(tmp))
+    combLev <- NA
+
+    # Create the matings (considers the reciprocals)
+    mating <- P1:P2
+    p <- length(levels(factor(c(levels(P1), levels(P2)) )))
+    n <- length(combination)
+
+    # See whether selfs are included and find the last level for each
+    # combination
+    selflist <- levels(factor(combination[P1c == P2c]))
+    levs <- sort(unique(c(levels(P1), levels(P2))))
+    tmp <- paste(levs, max(levs), sep = ":")
+    parLevs <- levs
+
+    # Step 1. Create an empty matrix
+    # Da qui cambia per la matrice sbilanciata
+    # Populate the matrix from GCAmat
+    gcamat <- GCAmis(P1, P2)
+    np <- ncol(gcamat)
+    n <- nrow(gcamat)
+    tab <- checkScheme(P1, P2)$missingCrosses
+    numMissing <- nrow(tab)
+
+    # Create empty scamat
+    scamat <- matrix(0, n, np * (np - 1)/2)
+    nams <- rep(0, np * (np - 1)/2)
+    cont <- 1
+    # Cross multiplication of matrices
+    for(i in 1:(np-1)){
+      for(j in (i+1):np){
+        scamat[,cont] <- gcamat[,i] * gcamat[,j]
+        n1 <- substr(colnames(gcamat)[i], 3, nchar(colnames(gcamat)[j]))
+        n2 <- substr(colnames(gcamat)[j], 3, nchar(colnames(gcamat)[j]))
+        nams[cont] <- paste(n1,n2, sep = ":")
+        cont <- cont + 1
+      }
+    }
+    colnames(scamat) <- nams
+
+    # Rimuove le colonne dei missing crosses
+    if(!is.null(numMissing)){
+      toRem <- c()
+      for(i in 1:numMissing){
+        # i <- 3
+        sel <- paste(parLevs[tab[i,1]], parLevs[tab[i,2]], sep = ":")
+        sel <- which(colnames(scamat)==sel)
+        # print(sel)
+        toRem <- c(toRem, sel)
+      }
+      scamat <- scamat[,-toRem]
+    }
+
+    # Rimuove l'ultima colonna e la sottrae dalle altre
+    last <- length(scamat[1,])
+    scamat <- scamat - scamat[,last]
+    scamat <- scamat[,-last]
+    # row.names()
+    scamat
+  }
 }
 

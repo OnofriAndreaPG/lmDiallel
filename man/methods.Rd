@@ -12,13 +12,14 @@
 \usage{
 \method{summary}{diallel}(object, MSE, dfr, ...)
 \method{vcov}{diallel}(object, MSE, ...)
-\method{anova}{diallel}(object, MSE, dfr, ...)
+\method{anova}{diallel}(object, MSE, dfr, type = 1, ...)
 \method{model.matrix}{diallel}(object, ...)
 }
 \arguments{
   \item{object}{ an object of class diallel.}
   \item{MSE}{ Mean Square Error, when it cannot be derived from model fit}
   \item{dfr}{ Residual degrees of freedom, when they cannot be derived from model fit}
+  \item{type}{ It is used to select between Type I (sequential) or Type III (marginal) F tests in ANOVA}
   \item{...}{ Other optional arguments}
 }
 \details{

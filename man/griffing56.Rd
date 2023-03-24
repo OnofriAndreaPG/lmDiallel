@@ -8,7 +8,7 @@ Griffing's dataset for diallel analysis
 Data for a diallel in maize, with no selfs and no selfed parents. Data are the means of several replicates.
 }
 \usage{
-data("griffig56")
+data("griffing56")
 }
 \format{
   A data.frame with 36 observations on the following 5 variables

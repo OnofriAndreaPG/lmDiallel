@@ -1,5 +1,6 @@
 \name{GCA}
 \alias{GCA}
+\alias{GCAmis}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 General Combining Ability effect

@@ -2,6 +2,7 @@
 \alias{SCA}
 \alias{SCA.G3}
 \alias{SCA.GE}
+\alias{SCAmis}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Specific Combining Ability

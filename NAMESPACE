@@ -5,7 +5,7 @@ importFrom("multcomp", "glht")
 importFrom("stats", ".getXlevels", "coef", "coefficients",
                 "contrasts<-", "deviance", "df", "df.residual", "dnorm",
                 "formula", "lm", "lm.fit", "model.extract", "model.matrix",
-                "model.response", "optim", "pf", "pt")
+                "model.response", "optim", "pf", "pt", "getCall")
 importFrom("stats", "anova", "fitted", "vcov", "window")
 importFrom("utils", "combn")
 export(model.matrixDiallel, lm.diallel, mmer.diallel, matBlock,
@@ -13,7 +13,7 @@ export(model.matrixDiallel, lm.diallel, mmer.diallel, matBlock,
        anova.diallel, glht.diallelMod, diallel.eff,
        GCA, VEi, SP, RGCA, tSCA, SCA, SCA.G3, SCA.GE, RSCA,
        REC, REC.G3, H.BAR, MDD, Hi, GCAC, DD, expand.diallel,
-       blockMatrixDiagonal)
+       blockMatrixDiagonal, int.matrix, checkScheme)
 
 ## S3 methods
 S3method(summary, diallel)
