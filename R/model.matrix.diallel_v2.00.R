@@ -936,7 +936,7 @@ SCA <- function(P1, P2, type = "fix", data = NULL){
     P2 <- data[[P2Name]]
   }
   if(type == "random"){
-    crosses <- ifelse(P1 == P2, 0, 1)
+    crosses <- ifelse(as.character(P1) == as.character(P2), 0, 1)
     combination <- factor( ifelse(as.character(P1) <= as.character(P2),
                                  paste(P1, P2, sep =""),
                                  paste(P2, P1, sep ="")) )
