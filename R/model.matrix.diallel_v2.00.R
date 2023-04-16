@@ -1832,7 +1832,7 @@ GCAmis <- function(P1, P2, type = "fix", data = NULL){
   # This is modified to work with mating design 4
   # in case of missing crosses, but it is supposed
   # to work always (to be tested)
-  # Edited on 18/3/2023
+  # Edited on 15/4/2023
   if(!is.null(data)){
     P1Name <- deparse(substitute(P1))
     P2Name <- deparse(substitute(P2))
@@ -1862,11 +1862,12 @@ GCAmis <- function(P1, P2, type = "fix", data = NULL){
     tab <- checkScheme(P1, P2)
 
     # Individua quali parents non hanno missing crosses
-    # Edited on 18/3/2023
-    misCros <- nams[unique(as.vector(tab$missingCrosses))]
+    # Edited on 15/04/2023
+    # misCros <- nams[unique(unlist(tab$missingCrosses))]
+    misCros <- unique(unlist(tab$missingCrosses))
     if(!is.null(misCros)){
       # misCros <- paste("g_", misCros, sep ="")
-      sel <- !(nams %in% misCros)
+      sel <- !(levs %in% misCros)
       wsel <- max(which(sel == TRUE))
       sel <- rep(TRUE, length(nams))
       sel[wsel] <- FALSE
@@ -1908,7 +1909,7 @@ SCAmis <- function(P1, P2, type = "fix", data = NULL){
     return(Z)
   } else {
 
-    # It is also used where the selfs are not includede
+    # It is also used where the selfs are not included
     P1 <- factor(as.character(P1)) #, levels = unique(P1))
     P2 <- factor(as.character(P2)) #, levels = unique(P1)) # Livelli uguali?
     P1c <- as.character(P1); P2c <- as.character(P2)
@@ -1960,8 +1961,9 @@ SCAmis <- function(P1, P2, type = "fix", data = NULL){
     if(!is.null(numMissing)){
       toRem <- c()
       for(i in 1:numMissing){
-        # i <- 3
-        sel <- paste(parLevs[tab[i,1]], parLevs[tab[i,2]], sep = ":")
+        # i <- 1
+        # sel <- paste(parLevs[tab[i,1]], parLevs[tab[i,2]], sep = ":")
+        sel <- paste(tab[i,1], tab[i,2], sep = ":")
         sel <- which(colnames(scamat)==sel)
         # print(sel)
         toRem <- c(toRem, sel)
@@ -1973,7 +1975,9 @@ SCAmis <- function(P1, P2, type = "fix", data = NULL){
     last <- length(scamat[1,])
     scamat <- scamat - scamat[,last]
     scamat <- scamat[,-last]
-    # row.names()
+    # Updated on 7/4/2023
+    colnames(scamat) <- paste("s_", colnames(scamat), sep = "")
+    # colnames(scamat) <- sub(":", "-", colnames(scamat))
     scamat
   }
 }

@@ -1,7 +1,7 @@
 \name{int.matrix}
 \alias{int.matrix}
 \alias{checkScheme}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
 \title{
 Utilities for fitting diallel models.
 }
@@ -17,7 +17,7 @@ checkScheme(P1, P2)
   \item{Xa}{Incidence matrix of genetic effects}
   \item{Xb}{Incidence matrix for an external factor}
   \item{P1}{A vector with parentals}
-  \item{P2}{A vector of parentals}
+  \item{P2}{A vector with parentals}
 }
 
 \details{

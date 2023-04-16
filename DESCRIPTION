@@ -1,7 +1,7 @@
 Package: lmDiallel
-Version: 1.0.0
-Date: 2023-03-24
-Title: Linear Fixed Effects Models for Diallel Crosses
+Version: 1.0.1
+Date: 2023-04-14
+Title: Linear Fixed/Mixed Effects Models for Diallel Crosses
 Authors@R: c(person("Andrea" , "Onofri", role = c("aut", "cre"), email="andrea.onofri@unipg.it"), 
              person("Niccolo", "Terzaroli", email="n.terzaroli@gmail.com", role = "aut"))
 Maintainer: Andrea Onofri <andrea.onofri@unipg.it>

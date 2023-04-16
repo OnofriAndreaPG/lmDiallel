@@ -246,6 +246,7 @@ GE2.eff <- function(obj){
 }
 
 G4.eff <- function(obj){
+  # Updated on 14/4/2023
   # Get the data
     assign <- attr(model.matrix(obj), "assign")
     P1 <- obj$model[,2]
@@ -264,8 +265,9 @@ G4.eff <- function(obj){
     P1 <- factor(as.character(P1))
     P2 <- factor(as.character(P2))
     levs <- c(levels(P1), levels(P2))
-    levs <- levels(factor(levs))
-    levs <- factor(levs)
+    # Edited on 15/4/2023
+    levs <- factor(unique(levs), levels = unique(levs))
+    # levs <- factor(levs)
     temp1 <- matrix(0, length(levs), length(assign))
 
     # Removed on 20/3/23 to allow for missing crosses
@@ -298,7 +300,8 @@ G4.eff <- function(obj){
     X <- SCAmis(expl[,1], expl[,2]) # Edited on 20/3/23
     temp2 <- matrix(0, length(X[,1]), length(assign))
     temp2[,assign == i + 2] <- X
-    row.names(temp2) <- paste("s", "_", expl[,1], ":", expl[,2], sep = "")
+    # Updated: 7/4/2023
+    row.names(temp2) <- paste("s", "_", expl[,1], "-", expl[,2], sep = "")
 
     # rimuovere le righe senza elementi non-zero
     X <- rbind(temp, temp1, temp2)
@@ -553,12 +556,12 @@ MET1.eff <- function(obj){
   if(length(Blk) == 0){
     temp <- data.frame(Y, P1, P2, Env)
     mods <- plyr::dlply(temp, c("Env"),
-      function(df) lm.diallel(Y ~ P1 + P2,
+      function(df) lm.diallel(Y ~ P1 + P2, data = df,
                               fct = fct))
   } else {
     temp <- data.frame(Y, P1, P2, Blk, Env)
     mods <- plyr::dlply(temp, c("Env"),
-      function(df) lm.diallel(Y ~ P1 + P2,
+      function(df) lm.diallel(Y ~ P1 + P2, data = df,
                               Block = Blk,
                               fct = fct))
   }
@@ -592,15 +595,15 @@ MET2.eff <- function(obj){
   Blk <- factor(obj$model$`(Block)`)
   Env <- factor(obj$model$`(Env)`)
   fct <- obj$fct
-    if(length(Blk) == 0){
+  if(length(Blk) == 0){
     temp <- data.frame(Y, P1, P2, Env)
     mods <- plyr::dlply(temp, c("Env"),
-      function(df) lm.diallel(Y ~ P1 + P2,
+      function(df) lm.diallel(Y ~ P1 + P2, data = df,
                               fct = fct))
   } else {
     temp <- data.frame(Y, P1, P2, Blk, Env)
     mods <- plyr::dlply(temp, c("Env"),
-      function(df) lm.diallel(Y ~ P1 + P2,
+      function(df) lm.diallel(Y ~ P1 + P2, data = df,
                               Block = Blk,
                               fct = fct))
   }
@@ -618,17 +621,29 @@ MET2.eff <- function(obj){
   for(i in 1:length(levels(temp$Env))) rownames(mats[[i]]) <- paste(rownames(mats[[i]]), names(mats)[i], sep = ":")
   colNames <- unlist(lapply(mats, colnames))
   rowNames <- unlist(lapply(mats, rownames))
+
+  # I have to verify whether the incidence matrices for the different
+  # environments are the same. This may not be true, when we have
+  # missing crosses in some environments, but not all. In this case,
+  # an error needs to be returned.
+  chk <- sapply(mats, function(el) length(el[,1]))
+  if(length(unique(chk)) != 1) stop("the incidence matrices for the different environments do not match")
+
   k <- mats[[1]]
   for(i in 2:length(mats)){
     k <- cbind(k, mats[[i]])
   }
-  k
+  # k
   mats2 <- matrix(0, length(k[,1]), length(mats))
   k <- cbind(mats2, k)/length(mats)
   return(k)
 }
 
 MET3.eff <- function(obj){
+  # Type = reduced. The model is refit by considering the environment
+  # or the environment:block as a blocking factor, so that I have average parameters
+  # and the displacement due to blocks. It assumes that the interaction is not
+  # significant
   Y <- obj$model[,1]
   P1 <- factor(obj$model[,2])
   P2 <- factor(obj$model[,3])
@@ -692,8 +707,6 @@ diallel.eff <- function(obj, MSE = NULL, dfr = NULL, type = "all") {
     }
   }
 
-
-
     linfct.list <- list(linfct = k, MSE = MSE, dfr = dfr, obj = obj)
     class(linfct.list) <- "diallelMod"
     return(linfct.list)
@@ -745,12 +758,15 @@ glht.diallelMod <- function(model, linfct, ...) {
     args <- list(coef = coefMod, vcov = vcovMod, df = 26)
     class(args) <- "parm"
     ret <- multcomp::glht(args, k)
+    # if(linfct$method == "emmeans"){
+    #   tmp <- summary(ret, test = adjusted(type = "none"))
+    #   ret <- emm(tmp)
+    # }
     return(ret)
-
 }
 
 expand.diallel <- function(pars, mating = 1){
-  pars <- sort(pars)
+  # pars <- sort(pars) Removed on 15/4/2023. To be checked
   # print(pars)
   if(mating == 1){
     Par1 <- rep(pars, each = length(pars))

@@ -1,77 +1,109 @@
+emm.diallel <- function(obj){
+  # This function operates on a summary.glht object, obtained from a
+  # MET lmDiallel object. It calculates the marginal means across
+  # environments.
+  nam <- names(obj$test$coefficient)
+  df <- data.frame("name" = nam)
+  nam <- tidyr::separate(df, col="name", into = c("eff", "env"), sep = ":")
+  df <- data.frame(nam, coef = obj$test$coefficient,
+                   SEs = obj$test$sigm,
+                   row.names = 1:length(nam[,1]))
+  dw <- tidyr::pivot_wider(df, names_from = env, values_from = coef,
+                  id_cols = eff, values_fn = mean)
+  dw2 <- tidyr::pivot_wider(df, names_from = env, values_from = SEs,
+                  id_cols = eff, values_fn = mean)
+  dw <- as.data.frame(dw)
+  effs <- apply(dw[,-1], 1, mean)
+  dw2 <- as.data.frame(dw2)
+  SEs <- apply(dw2[,-1], 1, function(row) sqrt(sum(row^2)/length(row)^2))
+  data.frame("Estimate" = effs, "Std. Error" = SEs,
+             "t value" = effs/SEs,
+             "Pr(>|t|)" = 2 * pt(effs/SEs, obj$df),
+             row.names = dw[,1],
+             check.names = F)
+}
+
 checkScheme <- function(P1, P2){
-  # This checks the mating scheme and checks whether there are missing crosses
-  # Edited 10/3/2023
-  # P1 <- dfb$Par1; P2 <- dfb$Par2
+  # This function checks the mating scheme and
+  # checks whether there are missing crosses
+  # Used internally and not exposed
+  # Edited 15/4/2023
   P1 <- factor(P1)
   P2 <- factor(P2)
-  levs <- unique(c(levels(P1), levels(P2)))
-  P1 <- factor(P1, levels = levs)
-  P2 <- factor(P2, levels = levs)
+  P12 <- factor(paste(P1, P2, sep = ":"))
   tab <- table(P1, P2)
-  selfs <- !all(diag(tab) == 0)
-  fullUpper <- any(tab[upper.tri(tab, diag = FALSE)] != 0)
-  fullLower <- any(tab[lower.tri(tab, diag = FALSE)] != 0)
-  missingUpper <- any(tab[upper.tri(tab, diag = FALSE)] == 0)
-  missingLower <- any(tab[lower.tri(tab, diag = FALSE)] == 0)
-  missingSelfs <- any(diag(tab) == 0)
+  parents <- unique(c(levels(P1), levels(P2)))
+  crosses <- levels(P12) # selfs are included, if available
 
-  if(selfs & fullUpper & fullLower) {
-    # Full Diallel
+  # Buolds all possible (hypothetical) combinations
+  selfsHyp <- paste(parents, parents, sep = ":")
+  crossesHyp <- paste(combn(parents, 2)[1,], combn(parents, 2)[2,], sep = ":")
+  recHyp <- paste(combn(parents, 2)[2,], combn(parents, 2)[1,], sep = ":")
+
+
+  # finds which selfs/crosses/reciprocals are included
+  # and checks for possible exchanges of parental roles
+  ss <- selfsHyp %in% crosses
+  cc <- crossesHyp %in% crosses
+  rr <- recHyp %in% crosses
+  rc <- c(matrix(cc,1) + matrix(rr,1))
+
+  # Based on the above the scheme and balance are
+  # detected
+  if(any(rc > 1) & any(ss)){
     matingScheme <- 1
-    if(missingUpper | missingLower | missingSelfs) {
-      mis <- which(tab == 0, arr.ind = T)
-      # misSelfs <- which(diag(tab) == 0, arr.ind = T)
-      # tab[tab == 0] <- NA
+    if(all(rc == 2) & all(ss)){
+      # balanced
+      mis <- NULL
     } else {
-        mis <- NULL
-        }
-  } else if (!selfs & fullUpper & fullLower)  {
-    # no selfs
-    matingScheme <- 3
-    diag(tab) <- NA
-    if(missingUpper | missingLower) {
-      mis <- which(tab == 0, arr.ind = T)
-      mis <- mis[mis[,1] != mis[,2],]
-      tab[tab == 0] <- NA
-      } else { mis <- NULL }
-  } else if (selfs & (!fullUpper | !fullLower)){
-      # no reciprocals
-      matingScheme <- 2
-      if(fullUpper & missingUpper) {
-        tab[lower.tri(tab, diag = F)] <- NA
-        mis <- which(tab == 0, arr.ind = T)
-        tab[tab == 0] <- NA
-      } else if(fullLower & missingLower){
-        tab[upper.tri(tab == 0, diag = F)] <- NA
-        mis <- which(tab == 0, arr.ind = T)
-        tab[tab == 0] <- NA
-      } else { mis <- NULL
-      if(fullLower) tab[upper.tri(tab, diag = F)] <- NA else tab[lower.tri(tab, diag = F)] <- NA
-      }
-  } else if (!selfs & (!fullUpper | !fullLower)){
-      # no selfs, no reciprocals
-      matingScheme <- 4
-      diag(tab) <- NA
-      if(fullUpper & missingUpper) {
-        tab[lower.tri(tab, diag = F)] <- NA
-        mis <- which(tab == 0, arr.ind = T)
-        tab[tab == 0] <- NA
-      } else if(fullLower & missingLower){
-        tab[upper.tri(tab == 0, diag = F)] <- NA
-        mis <- which(tab == 0, arr.ind = T)
-        tab[tab == 0] <- NA
-      } else { mis <- NULL
-      if(fullLower) tab[upper.tri(tab, diag = F)] <- NA else tab[lower.tri(tab, diag = F)] <- NA
-      }
+      # missing crosses
+      fulList <- c(selfsHyp, crossesHyp, recHyp)
+      mis <- fulList[!(fulList %in% crosses)]
+    }
 
+  } else if(!any(rc > 1) & any(ss)){
+    matingScheme <- 2
+    if(all(rc == 1) & all(ss)){
+      # balanced
+      mis <- NULL
+    } else {
+      # missing crosses
+      mis <- crossesHyp[!rc]
+      }
+  } else if(any(rc > 1) & !any(ss)){
+    matingScheme <- 3
+    if(all(rc == 2)){
+      # balanced
+      mis <- NULL
+    } else {
+      # missing crosses
+      fulList <- c(crossesHyp, recHyp)
+      mis <- fulList[!(fulList %in% crosses)]
+    }
+  } else if(!any(rc > 1) & !any(ss)){
+    matingScheme <- 4
+    if(all(rc == 1)){
+      # balanced
+      mis <- NULL
+    } else {
+      # missing crosses
+      mis <- crossesHyp[!rc]
+      }
   }
-  # Find parents with no missing crosses (in any)
-  # levs <- unique(c(levels(P1), levels(P2)))
-  parMis <- sort(unique(c(mis)))
-  parNoMis <- which(!(levs %in% levs[parMis]))
+
+  if(!is.null(mis)){
+    mis <- matrix(mis, length(mis), 1)
+    mis <- data.frame(do.call(rbind, strsplit(as.character(mis[,1]), ":", fixed = T)))
+    colnames(mis) <- c("Par1", "Par2")
+    parMis <- sort(unique(unlist(mis)))
+    parNoMis <- parents[!(parents %in% parMis)]
+  } else {
+    parNoMis <- parents
+  }
+
   list(matingScheme = matingScheme, missingCrosses = mis,
        # missingSelfs = t(misSelfs),
-       parNoMis = levs[parNoMis], tab = tab)
+       parNoMis = parNoMis, tab = tab)
 }
 
 int.matrix <- function(Xa, Xb){
