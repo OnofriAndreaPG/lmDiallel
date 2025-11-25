@@ -737,7 +737,7 @@ GCA <- function(P1, P2, type = "fix", data = NULL){
     P2 <- data[[P2Name]]
   }
   if(type == "random"){
-      Z <- sommer::overlay(P1, P2, sparse = F)
+      Z <- enhancer::overlay(P1, P2, sparse = F)
   } else {
   P1 <- factor(as.character(P1))
   P2 <- factor(as.character(P2))
@@ -1840,7 +1840,7 @@ GCAmis <- function(P1, P2, type = "fix", data = NULL){
     P2 <- data[[P2Name]]
   }
   if(type == "random"){
-    Z <- sommer::overlay(P1, P2, sparse = F)
+    Z <- enhancer::overlay(P1, P2, sparse = F)
   } else {
     # tmp <- data.frame(P2, P1)
     # arrange(tmp, P1)

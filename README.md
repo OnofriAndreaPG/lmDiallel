@@ -9,7 +9,9 @@ Installation
 ------------
 
 ``` r
-# You can install lmDiallel from GitHub
+# You can install the stable version from CRAN
+# install.packages("lmDiallel")
+# You can install the development version of lmDiallel from GitHub
 # install.packages("devtools")
 # devtools::install_github("onofriAndreaPG/lmDiallel")
 ```

@@ -1,5 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 importFrom("plyr", "dlply")
+importFrom("tidyr", "pivot_wider")
 # importFrom("sommer", "mmer", "overlay")
 importFrom("multcomp", "glht")
 importFrom("stats", ".getXlevels", "coef", "coefficients",

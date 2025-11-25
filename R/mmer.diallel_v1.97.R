@@ -619,18 +619,18 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   if(fct == "HAYMAN1"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2, sparse = F) +
-        overlay(Par1, Par2, sparse = F):dr +
+      form <- ~ Block + enhancer::overlay(Par1, Par2, sparse = F) +
+        enhancer::overlay(Par1, Par2, sparse = F):dr +
         combination + combination:dr # GCA + RGCA + tSCA + RSCA
       rnam <- c("Block", "GCA", "RGCA", "tSCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2, sparse = F) +
-        overlay(Par1, Par2, sparse = F):dr +
+      form <- ~ enhancer::overlay(Par1, Par2, sparse = F) +
+        enhancer::overlay(Par1, Par2, sparse = F):dr +
         combination + combination:dr # GCA + RGCA + tSCA + RSCA
       rnam <- c("GCA", "RGCA", "tSCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2, sparse = F) +
-        overlay(Par1, Par2, sparse = F):dr +
+      form <- ~ enhancer::overlay(Par1, Par2, sparse = F) +
+        enhancer::overlay(Par1, Par2, sparse = F):dr +
         combination # GCA + RGCA + tSCA + RSCA
       rnam <- c("GCA", "RGCA", "tSCA", "RSCA")
     }
@@ -639,19 +639,19 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   }else if(fct == "HAYMAN2"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + crosses + overlay(Par1, Par2, sparse = F) +
-        overlay(Par1, Par2, sparse = F):dr +
-        overlay(Par1, Par2, sparse = F):selfs + combination + combination:dr
+      form <- ~ Block + crosses + enhancer::overlay(Par1, Par2, sparse = F) +
+        enhancer::overlay(Par1, Par2, sparse = F):dr +
+        enhancer::overlay(Par1, Par2, sparse = F):selfs + combination + combination:dr
       rnam <- c("Block", "MDD", "GCA", "RGCA", "DD", "SCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ crosses + overlay(Par1, Par2, sparse = F) +
-        overlay(Par1, Par2, sparse = F):dr +
-        overlay(Par1, Par2, sparse = F):selfs + combination + combination:dr
+      form <- ~ crosses + enhancer::overlay(Par1, Par2, sparse = F) +
+        enhancer::overlay(Par1, Par2, sparse = F):dr +
+        enhancer::overlay(Par1, Par2, sparse = F):selfs + combination + combination:dr
       rnam <- c("MDD", "GCA", "RGCA", "DD", "SCA", "RSCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ crosses + overlay(Par1, Par2, sparse = F) +
-        overlay(Par1, Par2, sparse = F):dr +
-        overlay(Par1, Par2, sparse = F):selfs + combination
+      form <- ~ crosses + enhancer::overlay(Par1, Par2, sparse = F) +
+        enhancer::overlay(Par1, Par2, sparse = F):dr +
+        enhancer::overlay(Par1, Par2, sparse = F):selfs + combination
       rnam <- c("MDD", "GCA", "RGCA", "DD", "SCA", "RSCA")
     }
 
@@ -659,26 +659,26 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   }else if(fct == "GRIFFING1"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + combination + combination:dr
+      form <- ~ Block + enhancer::overlay(Par1, Par2) + combination + combination:dr
       rnam <- c("Block", "GCA", "tSCA", "REC", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + combination + combination:dr
+      form <- ~ enhancer::overlay(Par1, Par2) + combination + combination:dr
       rnam <- c("GCA", "tSCA", "REC", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2) + combination
+      form <- ~ enhancer::overlay(Par1, Par2) + combination
       rnam <- c("GCA", "tSCA", "REC")
     }
 
   }else if(fct == "GRIFFING3"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + combination + combination:dr
+      form <- ~ Block + enhancer::overlay(Par1, Par2) + combination + combination:dr
       rnam <- c("Block", "GCA", "SCA", "REC", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + combination + combination:dr
+      form <- ~ enhancer::overlay(Par1, Par2) + combination + combination:dr
       rnam <- c("GCA", "SCA", "REC", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2) + combination
+      form <- ~ enhancer::overlay(Par1, Par2) + combination
       rnam <- c("GCA", "SCA", "REC")
     }
 
@@ -686,13 +686,13 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   } else if(fct == "GRIFFING2"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + combination
+      form <- ~ Block + enhancer::overlay(Par1, Par2) + combination
       rnam <- c("Block", "GCA", "tSCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + combination
+      form <- ~ enhancer::overlay(Par1, Par2) + combination
       rnam <- c("GCA", "tSCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2)
+      form <- ~ enhancer::overlay(Par1, Par2)
       rnam <- c("GCA", "tSCA")
     }
 
@@ -700,13 +700,13 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   } else if(fct == "GRIFFING4"){
     formFix <- Y ~ 1
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + combination
+      form <- ~ Block + enhancer::overlay(Par1, Par2) + combination
       rnam <- c("Block", "GCA", "SCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + combination
+      form <- ~ enhancer::overlay(Par1, Par2) + combination
       rnam <- c("GCA", "SCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2)
+      form <- ~ enhancer::overlay(Par1, Par2)
       rnam <- c("GCA", "SCA")
     }
 
@@ -714,15 +714,15 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   } else if(fct == "GE2r"){
     formFix <- Y ~ crosses
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+      form <- ~ Block + enhancer::overlay(Par1, Par2) + enhancer::overlay(Par1, Par2):crosses +
         combination:crosses + combination:crosses:dr
       rnam <- c("Block", "Variety", "h.i", "SCA", "Reciprocals", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+      form <- ~ enhancer::overlay(Par1, Par2) + enhancer::overlay(Par1, Par2):crosses +
         combination:crosses + combination:crosses:dr
       rnam <- c("Variety", "h.i", "SCA", "Reciprocals", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+      form <- ~ enhancer::overlay(Par1, Par2) + enhancer::overlay(Par1, Par2):crosses +
         combination:crosses
       rnam <- c("Variety", "h.i", "SCA", "Reciprocals")
     }
@@ -731,15 +731,15 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   } else if(fct == "GE2"){
     formFix <- Y ~ crosses
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+      form <- ~ Block + enhancer::overlay(Par1, Par2) + enhancer::overlay(Par1, Par2):crosses +
         combination:crosses
       rnam <- c("Block", "Variety", "h.i", "SCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses +
+      form <- ~ enhancer::overlay(Par1, Par2) + enhancer::overlay(Par1, Par2):crosses +
         combination:crosses
       rnam <- c("Variety", "h.i", "SCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2) + overlay(Par1, Par2):crosses
+      form <- ~ enhancer::overlay(Par1, Par2) + enhancer::overlay(Par1, Par2):crosses
       rnam <- c("Variety", "h.i", "SCA")
     }
 
@@ -747,15 +747,15 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   } else if(fct == "GE3r"){
     formFix <- Y ~ crosses
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2):crosses + Par1:selfs +
+      form <- ~ Block + enhancer::overlay(Par1, Par2):crosses + Par1:selfs +
         combination:crosses + combination:crosses:dr
       rnam <- c("Block", "GCAC", "Selfed par.", "SCA", "Reciprocals", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs +
+      form <- ~ enhancer::overlay(Par1, Par2):crosses + Par1:selfs +
         combination:crosses + combination:crosses:dr
       rnam <- c("GCAC", "Selfed par.", "SCA", "Reciprocals", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs +
+      form <- ~ enhancer::overlay(Par1, Par2):crosses + Par1:selfs +
         combination:crosses
       rnam <- c("GCAC", "Selfed par.", "SCA", "Reciprocals")
     }
@@ -764,15 +764,15 @@ mmer.diallel <- function(formula, Block = NULL, Env = NULL,
   } else if(fct == "GE3"){
     formFix <- Y ~ crosses
     if(!is.null(Block)){
-      form <- ~ Block + overlay(Par1, Par2):crosses + Par1:selfs +
+      form <- ~ Block + enhancer::overlay(Par1, Par2):crosses + Par1:selfs +
         combination:crosses
       rnam <- c("Block", "GCAC", "Selfed par.", "SCA", "Residuals")
     } else if(is.null(Block) & withRep == T){
-      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs +
+      form <- ~ enhancer::overlay(Par1, Par2):crosses + Par1:selfs +
         combination:crosses
       rnam <- c("GCAC", "Selfed par.", "SCA", "Residuals")
     } else if(is.null(Block) & withRep == F){
-      form <- ~ overlay(Par1, Par2):crosses + Par1:selfs
+      form <- ~ enhancer::overlay(Par1, Par2):crosses + Par1:selfs
       rnam <- c("GCAC", "Selfed par.", "SCA")
     }
   }

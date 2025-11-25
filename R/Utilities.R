@@ -3,15 +3,17 @@ emm.diallel <- function(obj){
   # MET lmDiallel object. It calculates the marginal means across
   # environments.
   nam <- names(obj$test$coefficient)
-  df <- data.frame("name" = nam)
-  nam <- tidyr::separate(df, col="name", into = c("eff", "env"), sep = ":")
-  df <- data.frame(nam, coef = obj$test$coefficient,
+  # df <- data.frame("name" = nam)
+  df <- data.frame(do.call(rbind, strsplit(as.character(nam), ":", fixed = T)))
+  colnames(df) <- c("eff", "env")
+  # nam <- tidyr::separate(df, col="name", into = c("eff", "env"), sep = ":")
+  df <- data.frame(df, coef = obj$test$coefficient,
                    SEs = obj$test$sigm,
-                   row.names = 1:length(nam[,1]))
-  dw <- tidyr::pivot_wider(df, names_from = env, values_from = coef,
-                  id_cols = eff, values_fn = mean)
-  dw2 <- tidyr::pivot_wider(df, names_from = env, values_from = SEs,
-                  id_cols = eff, values_fn = mean)
+                   row.names = 1:length(df[,1]))
+  dw <- tidyr::pivot_wider(df, names_from = "env", values_from = coef,
+                  id_cols = "eff", values_fn = mean)
+  dw2 <- tidyr::pivot_wider(df, names_from = "env", values_from = SEs,
+                  id_cols = "eff", values_fn = mean)
   dw <- as.data.frame(dw)
   effs <- apply(dw[,-1], 1, mean)
   dw2 <- as.data.frame(dw2)

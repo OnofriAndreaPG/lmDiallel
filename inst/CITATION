@@ -1,13 +1,15 @@
 citHeader("To cite the package 'lmDiallel' in publications:")
 
-citEntry(entry   = "Article",
-         author = personList(as.person("A. Onofri"),
+bibentry(bibtype   = "Article",
+         author = c(as.person("A. Onofri"),
          as.person("N. Terzaroli"),
          as.person("L. Russi")),,
          title = "Linear models for diallel crosses: a review with R functions",
          journal = "Theoretical Applied Genetics",
-         year = 2020,
+         volume = 134,
+         pages = 585-601,
+         year = 2021,
          textVersion =
-         paste("Onofri, A., Terzaroli, N., Russi, L. (2020).",
-               "Linear models for diallel crosses: a review with R functions", "Theoretical Applied Genetics, https://doi.org/10.1007/s00122-020-03716-8")
+         paste("Onofri, A., Terzaroli, N., Russi, L. (2021).",
+               "Linear models for diallel crosses: a review with R functions", "Theoretical Applied Genetics, 134, 585-601, https://doi.org/10.1007/s00122-020-03716-8")
 )

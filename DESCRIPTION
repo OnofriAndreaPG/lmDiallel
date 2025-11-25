@@ -1,12 +1,12 @@
 Package: lmDiallel
-Version: 1.0.1
-Date: 2023-04-14
+Version: 1.0.2
+Date: 2025-11-25
 Title: Linear Fixed/Mixed Effects Models for Diallel Crosses
 Authors@R: c(person("Andrea" , "Onofri", role = c("aut", "cre"), email="andrea.onofri@unipg.it"), 
              person("Niccolo", "Terzaroli", email="n.terzaroli@gmail.com", role = "aut"))
 Maintainer: Andrea Onofri <andrea.onofri@unipg.it>
 Depends: R (>= 3.5.0)
-Imports: multcomp, plyr, sommer
+Imports: multcomp, plyr, sommer, enhancer, tidyr
 Description: Several service functions to be used to analyse datasets obtained from diallel experiments within the frame of linear models in R, as described in  Onofri et al (2020) <DOI:10.1007/s00122-020-03716-8>.
 URL: https://www.statforbiology.com/lmDiallel/
 License: GPL (>= 2)
